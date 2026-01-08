@@ -31,7 +31,25 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+Verificar conformidade com os princípios da Constituição Stela CRM:
+
+- ✅ **Multitenancy**: Como será garantido isolamento de dados por tenant?
+- ✅ **API First**: APIs definidas e documentadas antes da UI?
+- ✅ **Library First**: Funcionalidades complexas serão bibliotecas independentes?
+- ✅ **Cloud Native**: Arquitetura compatível com nuvem (12-Factor App)?
+- ✅ **Non-Blocking**: Operações longas são assíncronas? APIs respondem <200ms?
+- ✅ **Self-Service Onboarding**: Onboarding pode ser feito sem suporte manual?
+- ✅ **Sensible Defaults**: Sistema funciona "out of the box"?
+- ✅ **TDD**: Testes escritos antes da implementação?
+- ✅ **Least Privilege**: Permissões mínimas necessárias?
+- ✅ **SOLID**: Design segue princípios SOLID?
+- ✅ **Clean Code/Architecture**: Código limpo e arquitetura em camadas?
+- ✅ **DRY**: Sem duplicação de lógica/conhecimento?
+- ✅ **KISS**: Solução mais simples possível?
+- ✅ **YAGNI**: Apenas o necessário para requisitos atuais?
+- ✅ **Design Patterns**: Patterns apropriados aplicados?
+
+**Violações Justificadas**: [Listar apenas se houver violações necessárias, com justificativa clara]
 
 ## Project Structure
 
