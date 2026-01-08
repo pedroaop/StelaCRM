@@ -1,9 +1,18 @@
 # Feature Specification: StelaCRM - Plataforma SaaS Multitenant
 
 **Feature Branch**: `1-stela-crm`  
-**Created**: 2025-01-27  
+**Created**: 2026-01-08  
 **Status**: Draft  
 **Input**: User description: "Saas Multitenant para pequenas empresas que precisam de obter sucesso nas evendas e que querem de uma solução simples e flexível com Vários Funis, Etapas de funil editáveis, Visualização de funis/pipelines (kanban e outros), Qualificação de leads, Importar/Exportar leads e oportunidades, Cadastro de tarefas, Cadastro de anotações, Cadastro de produtos/serviços, Cotação/proposta, Perfis e Permissões de Usuários, Dasboard por usuário, Distribuição de leads por usuário, Integrar com Formulários, Envio de E-mail, Modelo de E-mail, Envio de propostas PDF, Workflow de atividades (tarefas, e-mail), Relatórios e dashboard"
+
+## Clarifications
+
+### Session 2026-01-08
+
+- Q: Como o sistema lida com leads duplicados na importação? → A: Sistema detecta duplicados por email OU telefone e oferece opções ao usuário: mesclar dados, pular registro duplicado, ou criar mesmo assim
+- Q: O que acontece quando uma etapa de funil é deletada mas possui oportunidades? → A: Sistema impede deleção e exige que usuário mova/realoque manualmente todas as oportunidades antes de deletar a etapa
+- Q: O que acontece quando workflow dispara ação mas usuário alvo não existe mais? → A: Sistema valida usuário antes de executar ação, pula ação se usuário inválido, registra em log e notifica administrador do tenant
+- Q: Como o sistema lida com permissões quando um usuário muda de perfil? → A: Sistema aplica novo perfil imediatamente, mantém histórico de ações com perfil anterior para auditoria, e registra mudança de perfil em log de auditoria
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -34,7 +43,8 @@ Como vendedor ou gestor de vendas, quero criar e personalizar funis de vendas co
 **Acceptance Scenarios**:
 
 1. **Given** um usuário autenticado, **When** cria um novo funil de vendas, **Then** o sistema permite definir nome, descrição, e etapas customizadas com ordem definida pelo usuário
-2. **Given** um funil existente, **When** o usuário edita as etapas (adiciona, remove, renomeia, reordena), **Then** as alterações são salvas e leads/oportunidades existentes são preservados, sendo realocados se necessário
+2. **Given** um funil existente, **When** o usuário edita as etapas (adiciona, renomeia, reordena), **Then** as alterações são salvas e leads/oportunidades existentes são preservados
+2. **Given** um funil com etapa contendo oportunidades, **When** o usuário tenta deletar a etapa, **Then** o sistema impede a deleção, informa quantas oportunidades estão nessa etapa, e exige que todas sejam movidas manualmente antes de permitir a deleção
 3. **Given** um funil com leads/oportunidades, **When** o usuário visualiza em formato kanban, **Then** cada card representa uma oportunidade mostrando informações essenciais (nome, valor, data de atualização) e pode ser arrastado entre colunas para mudar de etapa
 4. **Given** múltiplos funis criados, **When** o usuário navega entre eles, **Then** o sistema mantém o estado de visualização e filtros de cada funil independentemente
 
@@ -68,7 +78,7 @@ Como gestor ou administrador, quero importar leads e oportunidades de planilhas 
 **Acceptance Scenarios**:
 
 1. **Given** um usuário com permissão de importação, **When** faz upload de arquivo CSV/Excel com colunas mapeadas para campos do sistema (nome, email, telefone, etc.), **Then** o sistema valida os dados, mostra preview das linhas a importar, permite correções, e importa criando leads/oportunidades no funil selecionado
-2. **Given** dados importados, **When** ocorrem erros de validação (emails inválidos, campos obrigatórios faltando), **Then** o sistema reporta erros específicos por linha, permite correção antes da importação, e importa apenas registros válidos
+2. **Given** dados importados, **When** ocorrem erros de validação (emails inválidos, campos obrigatórios faltando) ou duplicados são detectados (email ou telefone já existe), **Then** o sistema reporta erros específicos por linha, para duplicados oferece opções (mesclar/pular/criar), permite correção antes da importação, e importa apenas registros válidos conforme decisões do usuário
 3. **Given** leads e oportunidades no sistema, **When** o usuário solicita exportação, **Then** o sistema gera arquivo CSV/Excel com todos os dados filtrados (por funil, etapa, período, etc.) incluindo histórico relevante
 
 ---
@@ -167,7 +177,8 @@ Como gestor, quero configurar workflows automatizados que disparem ações (tare
 
 1. **Given** um administrador, **When** cria regra de workflow definindo trigger (evento: lead criado, etapa alterada, etc.), condição (se aplicável), e ações (criar tarefa, enviar email, mover etapa, etc.), **Then** a regra é salva e fica ativa
 2. **Given** regras de workflow ativas, **When** evento trigger ocorre (ex: lead criado na etapa "Novo Lead"), **Then** o sistema avalia condições e executa ações configuradas automaticamente
-3. **Given** workflows executados, **When** o usuário visualiza histórico de uma oportunidade, **Then** ações automáticas são identificadas e registradas no histórico
+3. **Given** workflows executados, **When** o usuário visualiza histórico de uma oportunidade, **Then** ações automáticas são identificadas e registradas no histórico (sucessos e falhas)
+4. **Given** uma regra de workflow que cria tarefa atribuída a usuário específico, **When** o workflow dispara mas o usuário alvo foi deletado ou desativado, **Then** o sistema valida usuário antes de executar, pula a ação, registra falha em log de auditoria e notifica administrador do tenant
 
 ---
 
@@ -190,13 +201,13 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 
 ### Edge Cases
 
-- O que acontece quando um usuário tenta acessar dados de outro tenant? (Isolamento multitenancy)
-- Como o sistema lida com leads duplicados na importação? (detecção por email/telefone)
+- O que acontece quando um usuário tenta acessar dados de outro tenant? (Isolamento multitenancy) - Sistema bloqueia acesso e retorna erro de autorização
+- Como o sistema lida com leads duplicados na importação? - Sistema detecta por email OU telefone e oferece opções: mesclar, pular ou criar mesmo assim
 - O que acontece quando uma proposta é enviada mas o email falha? (retry, notificação)
 - Como o sistema lida com usuários que têm múltiplos funis ativos simultaneamente?
-- O que acontece quando uma etapa de funil é deletada mas possui oportunidades? (prevenir ou realocar)
-- Como o sistema lida com permissões quando um usuário muda de perfil? (auditoria, histórico)
-- O que acontece quando workflow dispara ação mas usuário alvo não existe mais? (validação, fallback)
+- O que acontece quando uma etapa de funil é deletada mas possui oportunidades? - Sistema impede deleção e exige que usuário mova todas as oportunidades manualmente antes
+- Como o sistema lida com permissões quando um usuário muda de perfil? - Sistema aplica novo perfil imediatamente, mantém histórico de ações com perfil anterior, e registra mudança em log de auditoria
+- O que acontece quando workflow dispara ação mas usuário alvo não existe mais? - Sistema valida usuário antes de executar, pula ação se inválido, registra em log e notifica administrador
 - Como o sistema lida com dados corrompidos na importação? (validação, rollback parcial)
 
 ## Requirements *(mandatory)*
@@ -204,84 +215,92 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 ### Functional Requirements
 
 #### Multitenancy e Segurança
-- **FR-001**: Sistema MUST garantir isolamento estrito de dados entre tenants - nenhum tenant pode acessar dados de outro tenant sob nenhuma circunstância
-- **FR-002**: Sistema MUST autenticar usuários e validar permissões em todas as operações
-- **FR-003**: Sistema MUST implementar princípio do menor privilégio - usuários têm apenas permissões mínimas necessárias conforme perfil
-- **FR-004**: Sistema MUST registrar auditoria de operações críticas (criação/edição/deleção de leads, alterações de permissões, etc.)
+- **FR-001**: Sistema deve garantir isolamento estrito de dados entre tenants - nenhum tenant pode acessar dados de outro tenant sob nenhuma circunstância
+- **FR-002**: Sistema deve autenticar usuários e validar permissões em todas as operações
+- **FR-003**: Sistema deve implementar princípio do menor privilégio - usuários têm apenas permissões mínimas necessárias conforme perfil
+- **FR-004**: Sistema deve registrar auditoria de operações críticas (criação/edição/deleção de leads, alterações de permissões, etc.)
 
 #### Funis e Pipelines
-- **FR-005**: Sistema MUST permitir criação de múltiplos funis de vendas por tenant
-- **FR-006**: Sistema MUST permitir que usuários criem, editem, reordenem e deletem etapas de funil (com validação se etapas possuem oportunidades)
-- **FR-007**: Sistema MUST fornecer visualização kanban de leads/oportunidades por etapa do funil
-- **FR-008**: Sistema MUST permitir drag-and-drop de oportunidades entre etapas no kanban
-- **FR-009**: Sistema MUST fornecer visualização de lista de leads/oportunidades com colunas configuráveis e ordenação
-- **FR-010**: Sistema MUST fornecer visualização de tabela de leads/oportunidades com filtros avançados e exportação
+- **FR-005**: Sistema deve permitir criação de múltiplos funis de vendas por tenant
+- **FR-006**: Sistema deve permitir que usuários criem, editem, reordenem e deletem etapas de funil
+- **FR-006a**: Sistema deve impedir deleção de etapa de funil se existirem oportunidades associadas a ela, exigindo que usuário mova/realoque todas as oportunidades manualmente antes de deletar
+- **FR-007**: Sistema deve fornecer visualização kanban de leads/oportunidades por etapa do funil
+- **FR-008**: Sistema deve permitir drag-and-drop de oportunidades entre etapas no kanban
+- **FR-009**: Sistema deve fornecer visualização de lista de leads/oportunidades com colunas configuráveis e ordenação
+- **FR-010**: Sistema deve fornecer visualização de tabela de leads/oportunidades com filtros avançados e exportação
 
 #### Leads e Oportunidades
-- **FR-011**: Sistema MUST permitir criação manual de leads com campos: nome, empresa, email, telefone, origem, funil, etapa inicial
-- **FR-012**: Sistema MUST permitir qualificação de leads com campos customizáveis e score numérico
-- **FR-013**: Sistema MUST permitir conversão de lead em oportunidade atribuindo valor estimado e produtos/serviços
-- **FR-014**: Sistema MUST manter histórico completo de mudanças de etapa de oportunidades (data, usuário, etapa anterior, etapa nova)
-- **FR-015**: Sistema MUST permitir atribuição manual de leads/oportunidades a usuários
-- **FR-016**: Sistema MUST permitir distribuição automática de leads baseada em regras configuráveis (round-robin, por região, por origem, etc.)
+- **FR-011**: Sistema deve permitir criação manual de leads com campos: nome, empresa, email, telefone, origem, funil, etapa inicial
+- **FR-012**: Sistema deve permitir qualificação de leads com campos customizáveis e score numérico
+- **FR-013**: Sistema deve permitir conversão de lead em oportunidade atribuindo valor estimado e produtos/serviços
+- **FR-014**: Sistema deve manter histórico completo de mudanças de etapa de oportunidades (data, usuário, etapa anterior, etapa nova)
+- **FR-015**: Sistema deve permitir atribuição manual de leads/oportunidades a usuários
+- **FR-016**: Sistema deve permitir distribuição automática de leads baseada em regras configuráveis (round-robin, por região, por origem, etc.)
 
 #### Importação e Exportação
-- **FR-017**: Sistema MUST permitir importação de leads/oportunidades via arquivo CSV ou Excel
-- **FR-018**: Sistema MUST validar dados durante importação (emails válidos, campos obrigatórios, formatos corretos)
-- **FR-019**: Sistema MUST reportar erros de importação por linha com detalhes específicos
-- **FR-020**: Sistema MUST permitir exportação de leads/oportunidades em CSV ou Excel com filtros aplicáveis
-- **FR-021**: Sistema MUST permitir mapeamento de colunas durante importação (coluna do arquivo → campo do sistema)
+- **FR-017**: Sistema deve permitir importação de leads/oportunidades via arquivo CSV ou Excel
+- **FR-018**: Sistema deve validar dados durante importação (emails válidos, campos obrigatórios, formatos corretos)
+- **FR-019**: Sistema deve detectar leads duplicados durante importação comparando email OU telefone com registros existentes
+- **FR-020**: Sistema deve oferecer opções ao usuário para cada duplicado detectado: mesclar dados com lead existente, pular registro duplicado, ou criar mesmo assim
+- **FR-021**: Sistema deve reportar erros de importação por linha com detalhes específicos, incluindo duplicados detectados
+- **FR-022**: Sistema deve permitir exportação de leads/oportunidades em CSV ou Excel com filtros aplicáveis
+- **FR-023**: Sistema deve permitir mapeamento de colunas durante importação (coluna do arquivo → campo do sistema)
 
 #### Tarefas e Anotações
-- **FR-022**: Sistema MUST permitir criação de tarefas vinculadas a leads/oportunidades com tipo, descrição, data/hora, responsável
-- **FR-023**: Sistema MUST permitir criação de anotações (texto livre com data/hora) vinculadas a leads/oportunidades
-- **FR-024**: Sistema MUST manter histórico cronológico de tarefas e anotações por lead/oportunidade
-- **FR-025**: Sistema MUST permitir marcar tarefas como concluídas e mostrar status no dashboard
+- **FR-024**: Sistema deve permitir criação de tarefas vinculadas a leads/oportunidades com tipo, descrição, data/hora, responsável
+- **FR-025**: Sistema deve permitir criação de anotações (texto livre com data/hora) vinculadas a leads/oportunidades
+- **FR-026**: Sistema deve manter histórico cronológico de tarefas e anotações por lead/oportunidade
+- **FR-027**: Sistema deve permitir marcar tarefas como concluídas e mostrar status no dashboard
 
 #### Produtos, Serviços e Propostas
-- **FR-026**: Sistema MUST permitir cadastro de produtos/serviços com: nome, descrição, preço unitário, categoria, status (ativo/inativo)
-- **FR-027**: Sistema MUST permitir criação de propostas/cotações vinculadas a oportunidades selecionando produtos, quantidades, aplicando descontos
-- **FR-028**: Sistema MUST calcular automaticamente totais de propostas (subtotal, descontos, total)
-- **FR-029**: Sistema MUST gerar PDF de propostas com formatação profissional incluindo dados da empresa, cliente, produtos, valores
-- **FR-030**: Sistema MUST permitir envio de propostas por email com PDF anexado
+- **FR-028**: Sistema deve permitir cadastro de produtos/serviços com: nome, descrição, preço unitário, categoria, status (ativo/inativo)
+- **FR-029**: Sistema deve permitir criação de propostas/cotações vinculadas a oportunidades selecionando produtos, quantidades, aplicando descontos
+- **FR-030**: Sistema deve calcular automaticamente totais de propostas (subtotal, descontos, total)
+- **FR-031**: Sistema deve gerar PDF de propostas com formatação profissional incluindo dados da empresa, cliente, produtos, valores
+- **FR-032**: Sistema deve permitir envio de propostas por email com PDF anexado
 
 #### Usuários, Perfis e Permissões
-- **FR-031**: Sistema MUST permitir criação de perfis de usuário com permissões granulares (visualizar/editar/deletar leads, acessar relatórios, gerenciar usuários, etc.)
-- **FR-032**: Sistema MUST permitir criação de usuários atribuindo perfil, email, nome
-- **FR-033**: Sistema MUST enviar convite por email para novos usuários
-- **FR-034**: Sistema MUST permitir que usuários redefinam senha via email
-- **FR-035**: Sistema MUST permitir edição de perfil do próprio usuário (nome, senha, preferências)
+- **FR-033**: Sistema deve permitir criação de perfis de usuário com permissões granulares (visualizar/editar/deletar leads, acessar relatórios, gerenciar usuários, etc.)
+- **FR-034**: Sistema deve permitir criação de usuários atribuindo perfil, email, nome
+- **FR-035**: Sistema deve enviar convite por email para novos usuários
+- **FR-036**: Sistema deve permitir que usuários redefinam senha via email
+- **FR-037**: Sistema deve permitir edição de perfil do próprio usuário (nome, senha, preferências)
+- **FR-037a**: Sistema deve permitir alteração de perfil de usuário (atribuição de novo perfil), aplicando novas permissões imediatamente
+- **FR-037b**: Sistema deve manter histórico de ações do usuário com referência ao perfil que tinha no momento da ação, preservando contexto de auditoria
+- **FR-037c**: Sistema deve registrar mudanças de perfil de usuário em log de auditoria incluindo: usuário alterado, perfil anterior, perfil novo, quem fez a alteração, data/hora
 
 #### Dashboard
-- **FR-036**: Sistema MUST fornecer dashboard personalizado por usuário mostrando métricas relevantes ao perfil
-- **FR-037**: Sistema MUST calcular e exibir métricas: leads atribuídos, oportunidades por etapa, valor total em pipeline, tarefas pendentes, taxa de conversão
-- **FR-038**: Sistema MUST permitir filtrar dashboard por período (hoje, semana, mês, período customizado)
-- **FR-039**: Sistema MUST exibir dashboard com tempo de carregamento < 2 segundos para 95% dos casos
+- **FR-038**: Sistema deve fornecer dashboard personalizado por usuário mostrando métricas relevantes ao perfil
+- **FR-039**: Sistema deve calcular e exibir métricas: leads atribuídos, oportunidades por etapa, valor total em pipeline, tarefas pendentes, taxa de conversão
+- **FR-040**: Sistema deve permitir filtrar dashboard por período (hoje, semana, mês, período customizado)
+- **FR-041**: Sistema deve exibir dashboard com tempo de carregamento < 2 segundos para 95% dos casos
 
 #### Integração e Email
-- **FR-040**: Sistema MUST fornecer integração com formulários web via webhook ou código de embed
-- **FR-041**: Sistema MUST permitir criação de templates de email com variáveis dinâmicas (nome cliente, valor proposta, etc.)
-- **FR-042**: Sistema MUST permitir envio manual de emails vinculados a oportunidades
-- **FR-043**: Sistema MUST salvar cópia de emails enviados no histórico da oportunidade
-- **FR-044**: Sistema MUST registrar status de entrega de emails quando disponível (enviado, entregue, falhou)
+- **FR-042**: Sistema deve fornecer integração com formulários web via webhook ou código de embed
+- **FR-043**: Sistema deve permitir criação de templates de email com variáveis dinâmicas (nome cliente, valor proposta, etc.)
+- **FR-044**: Sistema deve permitir envio manual de emails vinculados a oportunidades
+- **FR-045**: Sistema deve salvar cópia de emails enviados no histórico da oportunidade
+- **FR-046**: Sistema deve registrar status de entrega de emails quando disponível (enviado, entregue, falhou)
 
 #### Workflow Automatizado
-- **FR-045**: Sistema MUST permitir criação de regras de workflow com trigger (eventos: lead criado, etapa alterada, etc.), condições opcionais, e ações (criar tarefa, enviar email, mover etapa)
-- **FR-046**: Sistema MUST executar workflows automaticamente quando triggers ocorrem e condições são atendidas
-- **FR-047**: Sistema MUST registrar execuções de workflow no histórico de oportunidades
-- **FR-048**: Sistema MUST permitir ativar/desativar workflows individualmente
+- **FR-047**: Sistema deve permitir criação de regras de workflow com trigger (eventos: lead criado, etapa alterada, etc.), condições opcionais, e ações (criar tarefa, enviar email, mover etapa)
+- **FR-048**: Sistema deve executar workflows automaticamente quando triggers ocorrem e condições são atendidas
+- **FR-048a**: Sistema deve validar existência e status de usuários alvo antes de executar ações de workflow que referenciam usuários
+- **FR-048b**: Sistema deve pular ação de workflow se usuário alvo for inválido (não existe ou está desativado), registrar falha em log de auditoria e notificar administrador do tenant
+- **FR-049**: Sistema deve registrar execuções de workflow no histórico de oportunidades (sucessos e falhas)
+- **FR-050**: Sistema deve permitir ativar/desativar workflows individualmente
 
 #### Relatórios
-- **FR-049**: Sistema MUST fornecer relatórios: conversão por funil, performance por vendedor, pipeline por período, taxa de conversão geral
-- **FR-050**: Sistema MUST permitir aplicar filtros em relatórios (período, funil, vendedor, etapa)
-- **FR-051**: Sistema MUST exibir relatórios em formato visual (tabelas, gráficos)
-- **FR-052**: Sistema MUST permitir exportação de relatórios em PDF ou Excel
+- **FR-051**: Sistema deve fornecer relatórios: conversão por funil, performance por vendedor, pipeline por período, taxa de conversão geral
+- **FR-052**: Sistema deve permitir aplicar filtros em relatórios (período, funil, vendedor, etapa)
+- **FR-053**: Sistema deve exibir relatórios em formato visual (tabelas, gráficos)
+- **FR-054**: Sistema deve permitir exportação de relatórios em PDF ou Excel
 
 #### Performance e Usabilidade
-- **FR-053**: Sistema MUST responder a 95% das requisições de API em menos de 200ms
-- **FR-054**: Sistema MUST funcionar corretamente em navegadores modernos (Chrome, Firefox, Safari, Edge - versões dos últimos 2 anos)
-- **FR-055**: Sistema MUST ser responsivo e utilizável em dispositivos móveis (tablets e smartphones)
-- **FR-056**: Sistema MUST fornecer feedback visual claro para todas as ações do usuário (loading, sucesso, erro)
+- **FR-055**: Sistema deve responder a 95% das requisições de API em menos de 200ms
+- **FR-056**: Sistema deve funcionar corretamente em navegadores modernos (Chrome, Firefox, Safari, Edge - versões dos últimos 2 anos)
+- **FR-057**: Sistema deve ser responsivo e utilizável em dispositivos móveis (tablets e smartphones)
+- **FR-058**: Sistema deve fornecer feedback visual claro para todas as ações do usuário (loading, sucesso, erro)
 
 ### Key Entities *(include if feature involves data)*
 
