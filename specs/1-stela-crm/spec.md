@@ -13,6 +13,11 @@
 - Q: O que acontece quando uma etapa de funil é deletada mas possui oportunidades? → A: Sistema impede deleção e exige que usuário mova/realoque manualmente todas as oportunidades antes de deletar a etapa
 - Q: O que acontece quando workflow dispara ação mas usuário alvo não existe mais? → A: Sistema valida usuário antes de executar ação, pula ação se usuário inválido, registra em log e notifica administrador do tenant
 - Q: Como o sistema lida com permissões quando um usuário muda de perfil? → A: Sistema aplica novo perfil imediatamente, mantém histórico de ações com perfil anterior para auditoria, e registra mudança de perfil em log de auditoria
+- Q: Como usuários alternam entre visualizações de pipeline (Kanban, Lista, Tabela)? → A: Sistema fornece seletor de visualização sempre visível na interface (botões/abas: Kanban, Lista, Tabela)
+- Q: Quais informações devem ser exibidas nos cards do Kanban? → A: Cards mostram informações essenciais (nome, valor, data de atualização) com opção de hover/expandir para ver mais detalhes (responsável, empresa, score, etc.)
+- Q: Como funcionam filtros e busca nas visualizações de pipeline? → A: Filtros e busca são compartilhados entre todas as visualizações, aplicados de forma consistente, permitindo alternar entre Kanban/Lista/Tabela mantendo os mesmos filtros
+- Q: Como o sistema lida com performance do Kanban quando há muitas oportunidades por etapa? → A: Sistema utiliza virtualização/lazy loading com scroll infinito nas colunas do kanban para manter performance mesmo com muitos cards
+- Q: Como o Kanban funciona em dispositivos móveis? → A: Kanban adaptativo: colunas empilhadas verticalmente em mobile, mantendo funcionalidade de drag-and-drop entre etapas
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -45,8 +50,10 @@ Como vendedor ou gestor de vendas, quero criar e personalizar funis de vendas co
 1. **Given** um usuário autenticado, **When** cria um novo funil de vendas, **Then** o sistema permite definir nome, descrição, e etapas customizadas com ordem definida pelo usuário
 2. **Given** um funil existente, **When** o usuário edita as etapas (adiciona, renomeia, reordena), **Then** as alterações são salvas e leads/oportunidades existentes são preservados
 2. **Given** um funil com etapa contendo oportunidades, **When** o usuário tenta deletar a etapa, **Then** o sistema impede a deleção, informa quantas oportunidades estão nessa etapa, e exige que todas sejam movidas manualmente antes de permitir a deleção
-3. **Given** um funil com leads/oportunidades, **When** o usuário visualiza em formato kanban, **Then** cada card representa uma oportunidade mostrando informações essenciais (nome, valor, data de atualização) e pode ser arrastado entre colunas para mudar de etapa
+3. **Given** um funil com leads/oportunidades, **When** o usuário visualiza em formato kanban, **Then** cada card representa uma oportunidade mostrando informações essenciais (nome, valor, data de atualização), permite hover ou expansão para ver detalhes adicionais (responsável, empresa, score), e pode ser arrastado entre colunas para mudar de etapa
 4. **Given** múltiplos funis criados, **When** o usuário navega entre eles, **Then** o sistema mantém o estado de visualização e filtros de cada funil independentemente
+5. **Given** um funil com oportunidades sendo visualizado, **When** o usuário alterna entre visualizações (Kanban, Lista, Tabela) usando o seletor sempre visível, **Then** o sistema exibe os mesmos dados na nova visualização mantendo filtros e configurações aplicadas
+6. **Given** um funil com oportunidades, **When** o usuário aplica filtros ou busca (por responsável, etapa, período, etc.), **Then** os filtros são aplicados consistentemente em todas as visualizações (Kanban, Lista, Tabela) e mantidos ao alternar entre elas
 
 ---
 
@@ -225,9 +232,16 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-006**: Sistema deve permitir que usuários criem, editem, reordenem e deletem etapas de funil
 - **FR-006a**: Sistema deve impedir deleção de etapa de funil se existirem oportunidades associadas a ela, exigindo que usuário mova/realoque todas as oportunidades manualmente antes de deletar
 - **FR-007**: Sistema deve fornecer visualização kanban de leads/oportunidades por etapa do funil
-- **FR-008**: Sistema deve permitir drag-and-drop de oportunidades entre etapas no kanban
+- **FR-007a**: Cards do kanban devem exibir informações essenciais: nome do lead/oportunidade, valor (quando aplicável), e data de última atualização
+- **FR-007b**: Cards do kanban devem permitir visualizar informações adicionais (responsável, empresa, score de qualificação, etc.) via hover ou expansão do card
+- **FR-007c**: Sistema deve utilizar virtualização/lazy loading com scroll infinito nas colunas do kanban para manter performance mesmo com muitas oportunidades por etapa
+- **FR-007d**: Sistema deve adaptar visualização kanban para dispositivos móveis: colunas empilhadas verticalmente, mantendo funcionalidade de drag-and-drop entre etapas
+- **FR-008**: Sistema deve permitir drag-and-drop de oportunidades entre etapas no kanban (desktop e mobile)
 - **FR-009**: Sistema deve fornecer visualização de lista de leads/oportunidades com colunas configuráveis e ordenação
 - **FR-010**: Sistema deve fornecer visualização de tabela de leads/oportunidades com filtros avançados e exportação
+- **FR-010a**: Sistema deve fornecer seletor de visualização sempre visível na interface permitindo alternar entre Kanban, Lista e Tabela
+- **FR-010b**: Sistema deve fornecer filtros e busca compartilhados entre todas as visualizações (Kanban, Lista, Tabela), aplicados de forma consistente
+- **FR-010c**: Sistema deve manter filtros e configurações aplicadas ao alternar entre visualizações (estado preservado)
 
 #### Leads e Oportunidades
 - **FR-011**: Sistema deve permitir criação manual de leads com campos: nome, empresa, email, telefone, origem, funil, etapa inicial
@@ -299,7 +313,7 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 #### Performance e Usabilidade
 - **FR-055**: Sistema deve responder a 95% das requisições de API em menos de 200ms
 - **FR-056**: Sistema deve funcionar corretamente em navegadores modernos (Chrome, Firefox, Safari, Edge - versões dos últimos 2 anos)
-- **FR-057**: Sistema deve ser responsivo e utilizável em dispositivos móveis (tablets e smartphones)
+- **FR-057**: Sistema deve ser responsivo e utilizável em dispositivos móveis (tablets e smartphones), adaptando visualizações (kanban com colunas verticais, lista compacta, etc.) conforme tamanho da tela
 - **FR-058**: Sistema deve fornecer feedback visual claro para todas as ações do usuário (loading, sucesso, erro)
 
 ### Key Entities *(include if feature involves data)*
@@ -348,7 +362,7 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 
 - **SC-006**: Sistema permite criação e edição de funil com até 10 etapas em menos de 5 segundos
 
-- **SC-007**: Visualização kanban suporta até 100 oportunidades por etapa sem degradação de performance perceptível
+- **SC-007**: Visualização kanban suporta até 100 oportunidades por etapa sem degradação de performance perceptível, utilizando virtualização/lazy loading com scroll infinito
 
 - **SC-008**: 90% dos usuários conseguem criar e enviar uma proposta completa (produtos, valores, PDF, email) em menos de 5 minutos na primeira tentativa
 
