@@ -18,6 +18,21 @@
 - Q: Como funcionam filtros e busca nas visualizações de pipeline? → A: Filtros e busca são compartilhados entre todas as visualizações, aplicados de forma consistente, permitindo alternar entre Kanban/Lista/Tabela mantendo os mesmos filtros
 - Q: Como o sistema lida com performance do Kanban quando há muitas oportunidades por etapa? → A: Sistema utiliza virtualização/lazy loading com scroll infinito nas colunas do kanban para manter performance mesmo com muitos cards
 - Q: Como o Kanban funciona em dispositivos móveis? → A: Kanban adaptativo: colunas empilhadas verticalmente em mobile, mantendo funcionalidade de drag-and-drop entre etapas
+- Q: Qual o escopo do menu de Tarefas? → A: Menu lista todas as tarefas do tenant com filtros por responsável, status, tipo e data de execução, respeitando permissões de visualização conforme perfil do usuário
+- Q: Quais ações estão disponíveis no menu de Tarefas? → A: Visualizar, editar, marcar como concluída, excluir e navegar para lead/oportunidade vinculada
+- Q: Quais visualizações estão disponíveis no menu de Tarefas? → A: Lista ordenada por data de execução como padrão, com opção de visualização em calendário
+- Q: Como funciona ordenação e agrupamento no menu de Tarefas? → A: Ordenação por data de execução como padrão, com opções alternativas de ordenação por status, responsável ou prioridade
+- Q: Há busca textual no menu de Tarefas? → A: Busca textual disponível buscando em descrição, responsável, lead/oportunidade vinculada, combinada com filtros existentes
+- Q: A qual entidade se aplica o status de negociação (Em andamento, Pausado, Vendido, Perdido)? → A: Status de negociação aplica-se apenas a Oportunidades (após conversão do lead), sendo independente da etapa do funil
+- Q: Qual o valor padrão e obrigatoriedade do status de negociação? → A: Status padrão "Em andamento" ao criar oportunidade, campo sempre presente e obrigatório
+- Q: Há restrições para mudança de status de negociação? → A: Permitir qualquer mudança de status, registrar histórico completo e alertar usuário em mudanças incomuns (ex: Vendido → Em andamento, Perdido → Vendido)
+- Q: Como o status de negociação é exibido nas visualizações de pipeline? → A: Status sempre visível como badge/indicador visual em todas as visualizações (Kanban, Lista, Tabela), com filtro por status disponível
+- Q: Como o status de negociação impacta métricas e relatórios? → A: Status "Vendido" e "Perdido" são excluídos do cálculo de pipeline ativo (valor em pipeline), mas incluídos em relatórios de conversão e análises históricas
+- Q: Como o valor total é exibido por etapa no Kanban? → A: Valor total exibido no cabeçalho de cada coluna do kanban, calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado"
+- Q: Leads podem ser arrastados entre etapas do funil? → A: Sim, sistema permite drag-and-drop tanto de leads quanto de oportunidades entre etapas do funil
+- Q: Quando o valor total por etapa é atualizado após drag-and-drop? → A: Atualização em tempo real, imediatamente após soltar o card na nova etapa
+- Q: Quais métricas devem aparecer no cabeçalho de cada coluna do Kanban? → A: Valor total ($) e quantidade de oportunidades/leads no cabeçalho de cada coluna/etapa
+- Q: Valor total e quantidade por etapa também aparecem em Lista e Tabela? → A: Sim, valor total e quantidade por etapa devem ser exibidos também nas visualizações Lista e Tabela para consistência
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -50,10 +65,11 @@ Como vendedor ou gestor de vendas, quero criar e personalizar funis de vendas co
 1. **Given** um usuário autenticado, **When** cria um novo funil de vendas, **Then** o sistema permite definir nome, descrição, e etapas customizadas com ordem definida pelo usuário
 2. **Given** um funil existente, **When** o usuário edita as etapas (adiciona, renomeia, reordena), **Then** as alterações são salvas e leads/oportunidades existentes são preservados
 2. **Given** um funil com etapa contendo oportunidades, **When** o usuário tenta deletar a etapa, **Then** o sistema impede a deleção, informa quantas oportunidades estão nessa etapa, e exige que todas sejam movidas manualmente antes de permitir a deleção
-3. **Given** um funil com leads/oportunidades, **When** o usuário visualiza em formato kanban, **Then** cada card representa uma oportunidade mostrando informações essenciais (nome, valor, data de atualização), permite hover ou expansão para ver detalhes adicionais (responsável, empresa, score), e pode ser arrastado entre colunas para mudar de etapa
-4. **Given** múltiplos funis criados, **When** o usuário navega entre eles, **Then** o sistema mantém o estado de visualização e filtros de cada funil independentemente
-5. **Given** um funil com oportunidades sendo visualizado, **When** o usuário alterna entre visualizações (Kanban, Lista, Tabela) usando o seletor sempre visível, **Then** o sistema exibe os mesmos dados na nova visualização mantendo filtros e configurações aplicadas
-6. **Given** um funil com oportunidades, **When** o usuário aplica filtros ou busca (por responsável, etapa, período, etc.), **Then** os filtros são aplicados consistentemente em todas as visualizações (Kanban, Lista, Tabela) e mantidos ao alternar entre elas
+3. **Given** um funil com leads/oportunidades, **When** o usuário visualiza em formato kanban, **Then** cada card representa lead ou oportunidade mostrando informações essenciais (nome, valor quando aplicável, data de atualização, status de negociação quando aplicável como badge visível), permite hover ou expansão para ver detalhes adicionais (responsável, empresa, score), pode ser arrastado entre colunas para mudar de etapa (tanto leads quanto oportunidades), e cada coluna exibe no cabeçalho: valor total ($) calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado", e quantidade total de leads e oportunidades na coluna
+4. **Given** um funil com oportunidades em diferentes etapas, **When** o usuário arrasta uma oportunidade ou lead de uma etapa para outra via drag-and-drop, **Then** o sistema atualiza a etapa imediatamente ao soltar o card, recalcula e atualiza em tempo real o valor total e quantidade exibidos nos cabeçalhos das colunas de origem e destino
+5. **Given** múltiplos funis criados, **When** o usuário navega entre eles, **Then** o sistema mantém o estado de visualização e filtros de cada funil independentemente
+6. **Given** um funil com oportunidades sendo visualizado, **When** o usuário alterna entre visualizações (Kanban, Lista, Tabela) usando o seletor sempre visível, **Then** o sistema exibe os mesmos dados na nova visualização mantendo filtros e configurações aplicadas, e valor total e quantidade por etapa são exibidos consistentemente em todas as visualizações
+7. **Given** um funil com oportunidades, **When** o usuário aplica filtros ou busca (por responsável, etapa, período, status de negociação, etc.), **Then** os filtros são aplicados consistentemente em todas as visualizações (Kanban, Lista, Tabela) e mantidos ao alternar entre elas
 
 ---
 
@@ -69,8 +85,13 @@ Como vendedor, quero cadastrar, qualificar e mover leads através das etapas do 
 
 1. **Given** um usuário em qualquer etapa do funil, **When** cria um novo lead manualmente, **Then** o sistema permite preencher informações básicas (nome, empresa, email, telefone, origem) e o lead é criado na etapa inicial do funil selecionado
 2. **Given** um lead existente, **When** o usuário qualifica o lead adicionando informações de qualificação (score, interesse, orçamento, timeline), **Then** essas informações são salvas e o lead pode ser filtrado e ordenado por critérios de qualificação
-3. **Given** um lead qualificado, **When** o usuário converte em oportunidade atribuindo valor estimado e produtos/serviços, **Then** o lead se torna uma oportunidade rastreável com valor potencial
-4. **Given** uma oportunidade em qualquer etapa, **When** o usuário move manualmente entre etapas (via drag-and-drop ou seleção), **Then** a oportunidade é atualizada com nova etapa, data de atualização é registrada, e histórico é mantido
+3. **Given** um lead qualificado, **When** o usuário converte em oportunidade atribuindo valor estimado e produtos/serviços, **Then** o lead se torna uma oportunidade rastreável com valor potencial e status de negociação "Em andamento" atribuído automaticamente
+5. **Given** um lead ou oportunidade em qualquer etapa, **When** o usuário move manualmente entre etapas (via drag-and-drop ou seleção), **Then** o lead/oportunidade é atualizado com nova etapa, data de atualização é registrada, histórico é mantido, e se for oportunidade, valor total nas colunas é recalculado
+5. **Given** uma oportunidade criada, **When** o usuário altera o status da negociação (Em andamento, Pausado, Vendido, Perdido), **Then** o status é atualizado independentemente da etapa do funil, histórico de mudança de status é registrado (data, usuário, status anterior, status novo), e qualquer mudança é permitida
+6. **Given** uma oportunidade com status "Vendido" ou "Perdido", **When** o usuário tenta alterar para outro status (ex: Vendido → Em andamento), **Then** o sistema exibe alerta informando que é uma mudança incomum e solicita confirmação antes de aplicar a alteração
+7. **Given** uma oportunidade com status "Vendido" ou "Perdido", **When** o usuário visualiza relatórios ou dashboard, **Then** essas oportunidades são identificadas e podem ser filtradas/agrupadas por status para análise de conversão
+8. **Given** oportunidades no sistema com diferentes status de negociação, **When** o usuário visualiza métricas de pipeline (valor em pipeline), **Then** o sistema calcula apenas oportunidades com status "Em andamento" ou "Pausado", excluindo "Vendido" e "Perdido"
+9. **Given** oportunidades no sistema, **When** o usuário gera relatório de conversão, **Then** o sistema inclui todas as oportunidades independente de status de negociação para análise histórica completa
 
 ---
 
@@ -103,6 +124,12 @@ Como vendedor, quero cadastrar tarefas e anotações relacionadas a leads/oportu
 1. **Given** uma oportunidade aberta, **When** o usuário cria uma tarefa (tipo: ligar, email, reunião, etc.) com data/hora e descrição, **Then** a tarefa é salva vinculada à oportunidade e aparece no dashboard do usuário na data agendada
 2. **Given** uma oportunidade ou lead, **When** o usuário adiciona uma anotação (texto livre, possivelmente com data/hora automática), **Then** a anotação é salva no histórico da oportunidade/lead e fica visível na timeline
 3. **Given** tarefas agendadas, **When** o usuário visualiza seu dashboard, **Then** o sistema mostra lista de tarefas pendentes ordenadas por prioridade/data, permitindo marcar como concluída
+4. **Given** um usuário autenticado, **When** acessa o menu/seção "Tarefas", **Then** o sistema lista todas as tarefas do tenant (conforme permissões do usuário) ordenadas por data de execução, permitindo filtrar por responsável, status, tipo e período
+5. **Given** o menu de Tarefas com filtros aplicados, **When** o usuário visualiza a listagem, **Then** as tarefas são exibidas ordenadas por data de execução (data/hora agendada) mostrando informações essenciais (descrição, responsável, lead/oportunidade vinculada, status)
+6. **Given** uma tarefa listada no menu de Tarefas, **When** o usuário interage com a tarefa, **Then** o sistema permite visualizar detalhes, editar informações, marcar como concluída, excluir e navegar diretamente para o lead/oportunidade vinculada
+7. **Given** o menu de Tarefas, **When** o usuário acessa a visualização, **Then** o sistema mostra lista ordenada por data de execução como padrão, com opção de alternar para visualização em calendário (diário, semanal, mensal)
+8. **Given** o menu de Tarefas em visualização de lista, **When** o usuário altera a ordenação, **Then** o sistema permite ordenar por data de execução (padrão), status, responsável ou prioridade
+9. **Given** o menu de Tarefas, **When** o usuário utiliza busca textual, **Then** o sistema busca tarefas por descrição, responsável ou lead/oportunidade vinculada, combinando resultados com filtros aplicados
 
 ---
 
@@ -236,7 +263,11 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-007b**: Cards do kanban devem permitir visualizar informações adicionais (responsável, empresa, score de qualificação, etc.) via hover ou expansão do card
 - **FR-007c**: Sistema deve utilizar virtualização/lazy loading com scroll infinito nas colunas do kanban para manter performance mesmo com muitas oportunidades por etapa
 - **FR-007d**: Sistema deve adaptar visualização kanban para dispositivos móveis: colunas empilhadas verticalmente, mantendo funcionalidade de drag-and-drop entre etapas
-- **FR-008**: Sistema deve permitir drag-and-drop de oportunidades entre etapas no kanban (desktop e mobile)
+- **FR-007e**: Sistema deve exibir valor total ($) no cabeçalho de cada coluna/etapa do kanban, calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado"
+- **FR-007f**: Sistema deve exibir quantidade de leads e oportunidades no cabeçalho de cada coluna/etapa do kanban (total de cards na coluna)
+- **FR-007g**: Sistema deve exibir valor total ($) e quantidade de leads/oportunidades por etapa também nas visualizações Lista e Tabela (em cabeçalhos/seções quando agrupadas por etapa)
+- **FR-008**: Sistema deve permitir drag-and-drop de leads e oportunidades entre etapas do funil no kanban (desktop e mobile)
+- **FR-008a**: Quando oportunidade é arrastada entre etapas, sistema deve atualizar automaticamente o valor total e quantidade exibidos no cabeçalho das colunas envolvidas (origem e destino) em tempo real, imediatamente após soltar o card na nova etapa
 - **FR-009**: Sistema deve fornecer visualização de lista de leads/oportunidades com colunas configuráveis e ordenação
 - **FR-010**: Sistema deve fornecer visualização de tabela de leads/oportunidades com filtros avançados e exportação
 - **FR-010a**: Sistema deve fornecer seletor de visualização sempre visível na interface permitindo alternar entre Kanban, Lista e Tabela
@@ -247,7 +278,16 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-011**: Sistema deve permitir criação manual de leads com campos: nome, empresa, email, telefone, origem, funil, etapa inicial
 - **FR-012**: Sistema deve permitir qualificação de leads com campos customizáveis e score numérico
 - **FR-013**: Sistema deve permitir conversão de lead em oportunidade atribuindo valor estimado e produtos/serviços
+- **FR-013a**: Sistema deve permitir alterar status da negociação de oportunidades com valores: Em andamento, Pausado, Vendido e Perdido
+- **FR-013b**: Status de negociação é independente da etapa do funil - uma oportunidade pode estar em qualquer etapa do funil com qualquer status de negociação
+- **FR-013c**: Sistema deve atribuir status padrão "Em andamento" automaticamente ao criar uma nova oportunidade
+- **FR-013d**: Status de negociação é campo obrigatório e sempre presente em oportunidades
+- **FR-013e**: Sistema deve permitir qualquer mudança de status de negociação (sem restrições)
+- **FR-013f**: Sistema deve alertar usuário quando mudanças incomuns de status são realizadas (ex: Vendido → Em andamento, Perdido → Vendido) antes de confirmar a alteração
+- **FR-013g**: Sistema deve exibir status de negociação sempre visível como badge/indicador visual em todas as visualizações de pipeline (Kanban, Lista, Tabela)
+- **FR-013h**: Sistema deve permitir filtrar oportunidades por status de negociação nas visualizações de pipeline
 - **FR-014**: Sistema deve manter histórico completo de mudanças de etapa de oportunidades (data, usuário, etapa anterior, etapa nova)
+- **FR-014a**: Sistema deve manter histórico de mudanças de status de negociação incluindo: data, usuário, status anterior, status novo
 - **FR-015**: Sistema deve permitir atribuição manual de leads/oportunidades a usuários
 - **FR-016**: Sistema deve permitir distribuição automática de leads baseada em regras configuráveis (round-robin, por região, por origem, etc.)
 
@@ -265,6 +305,14 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-025**: Sistema deve permitir criação de anotações (texto livre com data/hora) vinculadas a leads/oportunidades
 - **FR-026**: Sistema deve manter histórico cronológico de tarefas e anotações por lead/oportunidade
 - **FR-027**: Sistema deve permitir marcar tarefas como concluídas e mostrar status no dashboard
+- **FR-027a**: Sistema deve fornecer menu/seção dedicada "Tarefas" listando todas as tarefas do tenant ordenadas por data de execução (data/hora agendada)
+- **FR-027b**: Menu de Tarefas deve permitir filtrar por responsável, status (pendente/concluída), tipo de tarefa e período (hoje, semana, mês, período customizado)
+- **FR-027c**: Menu de Tarefas deve respeitar permissões de visualização conforme perfil do usuário (usuário vê suas tarefas + equipe se permitido, gerente vê equipe, admin vê todas)
+- **FR-027d**: Menu de Tarefas deve permitir realizar ações: visualizar detalhes, editar, marcar como concluída, excluir e navegar para lead/oportunidade vinculada
+- **FR-027e**: Menu de Tarefas deve fornecer visualização em lista ordenada por data de execução como padrão
+- **FR-027f**: Menu de Tarefas deve fornecer opção de visualização em calendário mostrando tarefas por dia/semana/mês
+- **FR-027g**: Menu de Tarefas deve permitir alternar ordenação: data de execução (padrão), status, responsável ou prioridade
+- **FR-027h**: Menu de Tarefas deve fornecer busca textual buscando em descrição, responsável e lead/oportunidade vinculada, combinada com filtros existentes
 
 #### Produtos, Serviços e Propostas
 - **FR-028**: Sistema deve permitir cadastro de produtos/serviços com: nome, descrição, preço unitário, categoria, status (ativo/inativo)
@@ -286,6 +334,8 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 #### Dashboard
 - **FR-038**: Sistema deve fornecer dashboard personalizado por usuário mostrando métricas relevantes ao perfil
 - **FR-039**: Sistema deve calcular e exibir métricas: leads atribuídos, oportunidades por etapa, valor total em pipeline, tarefas pendentes, taxa de conversão
+- **FR-039a**: Sistema deve excluir oportunidades com status "Vendido" ou "Perdido" do cálculo de valor em pipeline (apenas oportunidades com status "Em andamento" ou "Pausado" contam para pipeline ativo)
+- **FR-039b**: Sistema deve incluir todas as oportunidades (incluindo "Vendido" e "Perdido") em relatórios de conversão e análises históricas
 - **FR-040**: Sistema deve permitir filtrar dashboard por período (hoje, semana, mês, período customizado)
 - **FR-041**: Sistema deve exibir dashboard com tempo de carregamento < 2 segundos para 95% dos casos
 
@@ -306,7 +356,9 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 
 #### Relatórios
 - **FR-051**: Sistema deve fornecer relatórios: conversão por funil, performance por vendedor, pipeline por período, taxa de conversão geral
-- **FR-052**: Sistema deve permitir aplicar filtros em relatórios (período, funil, vendedor, etapa)
+- **FR-051a**: Relatórios de pipeline devem considerar apenas oportunidades com status "Em andamento" ou "Pausado" (excluir "Vendido" e "Perdido")
+- **FR-051b**: Relatórios de conversão e análises históricas devem incluir todas as oportunidades independente de status de negociação
+- **FR-052**: Sistema deve permitir aplicar filtros em relatórios (período, funil, vendedor, etapa, status de negociação)
 - **FR-053**: Sistema deve exibir relatórios em formato visual (tabelas, gráficos)
 - **FR-054**: Sistema deve permitir exportação de relatórios em PDF ou Excel
 
@@ -330,7 +382,7 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 
 - **Lead**: Representa um lead de vendas. Pertence a um tenant e funil, possui dados de contato (nome, empresa, email, telefone), qualificação (score, interesse, orçamento, timeline), origem, etapa atual, usuário atribuído, data de criação/atualização.
 
-- **Opportunity**: Representa uma oportunidade de venda (lead convertido). Estende Lead com valor estimado, produtos/serviços associados, propostas criadas. Movimenta-se entre etapas do funil.
+- **Opportunity**: Representa uma oportunidade de venda (lead convertido). Estende Lead com valor estimado, produtos/serviços associados, propostas criadas. Movimenta-se entre etapas do funil. Possui status de negociação (Em andamento, Pausado, Vendido, Perdido) independente da etapa do funil.
 
 - **Task**: Representa uma tarefa. Vinculada a lead/oportunidade ou independente, possui tipo (ligar, email, reunião, etc.), descrição, data/hora agendada, responsável, status (pendente, concluída), data de conclusão.
 
