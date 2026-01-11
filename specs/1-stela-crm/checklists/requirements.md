@@ -1,4 +1,4 @@
-# Specification Quality Checklist: StelaCRM - Plataforma SaaS Multitenant
+# Specification Quality Checklist: StelaCRM - Plataforma SaaS Single-Tenant
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2025-01-27  

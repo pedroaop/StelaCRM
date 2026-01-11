@@ -1,38 +1,9 @@
-# Feature Specification: StelaCRM - Plataforma SaaS Multitenant
+# Feature Specification: StelaCRM - Plataforma SaaS Single-Tenant
 
 **Feature Branch**: `1-stela-crm`  
 **Created**: 2026-01-08  
 **Status**: Draft  
-**Input**: User description: "Saas Multitenant para pequenas empresas que precisam de obter sucesso nas evendas e que querem de uma solução simples e flexível com Vários Funis, Etapas de funil editáveis, Visualização de funis/pipelines (kanban e outros), Qualificação de leads, Importar/Exportar leads e oportunidades, Cadastro de tarefas, Cadastro de anotações, Cadastro de produtos/serviços, Cotação/proposta, Perfis e Permissões de Usuários, Dasboard por usuário, Distribuição de leads por usuário, Integrar com Formulários, Envio de E-mail, Modelo de E-mail, Envio de propostas PDF, Workflow de atividades (tarefas, e-mail), Relatórios e dashboard"
-
-## Clarifications
-
-### Session 2026-01-08
-
-- Q: Como o sistema lida com leads duplicados na importação? → A: Sistema detecta duplicados por email OU telefone e oferece opções ao usuário: mesclar dados, pular registro duplicado, ou criar mesmo assim
-- Q: O que acontece quando uma etapa de funil é deletada mas possui oportunidades? → A: Sistema impede deleção e exige que usuário mova/realoque manualmente todas as oportunidades antes de deletar a etapa
-- Q: O que acontece quando workflow dispara ação mas usuário alvo não existe mais? → A: Sistema valida usuário antes de executar ação, pula ação se usuário inválido, registra em log e notifica administrador do tenant
-- Q: Como o sistema lida com permissões quando um usuário muda de perfil? → A: Sistema aplica novo perfil imediatamente, mantém histórico de ações com perfil anterior para auditoria, e registra mudança de perfil em log de auditoria
-- Q: Como usuários alternam entre visualizações de pipeline (Kanban, Lista, Tabela)? → A: Sistema fornece seletor de visualização sempre visível na interface (botões/abas: Kanban, Lista, Tabela)
-- Q: Quais informações devem ser exibidas nos cards do Kanban? → A: Cards mostram informações essenciais (nome, valor, data de atualização) com opção de hover/expandir para ver mais detalhes (responsável, empresa, score, etc.)
-- Q: Como funcionam filtros e busca nas visualizações de pipeline? → A: Filtros e busca são compartilhados entre todas as visualizações, aplicados de forma consistente, permitindo alternar entre Kanban/Lista/Tabela mantendo os mesmos filtros
-- Q: Como o sistema lida com performance do Kanban quando há muitas oportunidades por etapa? → A: Sistema utiliza virtualização/lazy loading com scroll infinito nas colunas do kanban para manter performance mesmo com muitos cards
-- Q: Como o Kanban funciona em dispositivos móveis? → A: Kanban adaptativo: colunas empilhadas verticalmente em mobile, mantendo funcionalidade de drag-and-drop entre etapas
-- Q: Qual o escopo do menu de Tarefas? → A: Menu lista todas as tarefas do tenant com filtros por responsável, status, tipo e data de execução, respeitando permissões de visualização conforme perfil do usuário
-- Q: Quais ações estão disponíveis no menu de Tarefas? → A: Visualizar, editar, marcar como concluída, excluir e navegar para lead/oportunidade vinculada
-- Q: Quais visualizações estão disponíveis no menu de Tarefas? → A: Lista ordenada por data de execução como padrão, com opção de visualização em calendário
-- Q: Como funciona ordenação e agrupamento no menu de Tarefas? → A: Ordenação por data de execução como padrão, com opções alternativas de ordenação por status, responsável ou prioridade
-- Q: Há busca textual no menu de Tarefas? → A: Busca textual disponível buscando em descrição, responsável, lead/oportunidade vinculada, combinada com filtros existentes
-- Q: A qual entidade se aplica o status de negociação (Em andamento, Pausado, Vendido, Perdido)? → A: Status de negociação aplica-se apenas a Oportunidades (após conversão do lead), sendo independente da etapa do funil
-- Q: Qual o valor padrão e obrigatoriedade do status de negociação? → A: Status padrão "Em andamento" ao criar oportunidade, campo sempre presente e obrigatório
-- Q: Há restrições para mudança de status de negociação? → A: Permitir qualquer mudança de status, registrar histórico completo e alertar usuário em mudanças incomuns (ex: Vendido → Em andamento, Perdido → Vendido)
-- Q: Como o status de negociação é exibido nas visualizações de pipeline? → A: Status sempre visível como badge/indicador visual em todas as visualizações (Kanban, Lista, Tabela), com filtro por status disponível
-- Q: Como o status de negociação impacta métricas e relatórios? → A: Status "Vendido" e "Perdido" são excluídos do cálculo de pipeline ativo (valor em pipeline), mas incluídos em relatórios de conversão e análises históricas
-- Q: Como o valor total é exibido por etapa no Kanban? → A: Valor total exibido no cabeçalho de cada coluna do kanban, calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado"
-- Q: Leads podem ser arrastados entre etapas do funil? → A: Sim, sistema permite drag-and-drop tanto de leads quanto de oportunidades entre etapas do funil
-- Q: Quando o valor total por etapa é atualizado após drag-and-drop? → A: Atualização em tempo real, imediatamente após soltar o card na nova etapa
-- Q: Quais métricas devem aparecer no cabeçalho de cada coluna do Kanban? → A: Valor total ($) e quantidade de oportunidades/leads no cabeçalho de cada coluna/etapa
-- Q: Valor total e quantidade por etapa também aparecem em Lista e Tabela? → A: Sim, valor total e quantidade por etapa devem ser exibidos também nas visualizações Lista e Tabela para consistência
+**Input**: User description: "Saas Single-Tenant para pequenas empresas que precisam de obter sucesso nas evendas e que querem de uma solução simples e flexível com Vários Funis, Etapas de funil editáveis, Visualização de funis/pipelines (kanban e outros), Qualificação de leads, Importar/Exportar leads e oportunidades, Cadastro de tarefas, Cadastro de anotações, Cadastro de produtos/serviços, Cotação/proposta, Perfis e Permissões de Usuários, Dasboard por usuário, Distribuição de leads por usuário, Integrar com Formulários, Envio de E-mail, Modelo de E-mail, Envio de propostas PDF, Workflow de atividades (tarefas, e-mail), Relatórios e dashboard"
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -42,13 +13,13 @@ Como empresário de uma pequena empresa, quero configurar minha conta no StelaCR
 
 **Why this priority**: O onboarding é a primeira experiência do usuário. Se não conseguir configurar e começar a usar rapidamente, não haverá adoção. Além disso, a constituição exige Self-Service Onboarding, então este é fundamental.
 
-**Independent Test**: Um novo tenant pode criar conta, configurar seu primeiro funil de vendas com etapas padrão, adicionar um produto/serviço, e criar seu primeiro lead, tudo em menos de 10 minutos, sem assistência externa.
+**Independent Test**: Um administrador inicial pode configurar a instalação (nome da empresa, dados básicos), criar o primeiro usuário administrador, configurar primeiro funil de vendas com etapas padrão, adicionar um produto/serviço, e criar seu primeiro lead, tudo em menos de 10 minutos, sem assistência externa.
 
 **Acceptance Scenarios**:
 
-1. **Given** um novo usuário acessa o sistema pela primeira vez, **When** cria uma conta de tenant, **Then** o sistema configura automaticamente um funil de vendas padrão com etapas comuns (Lead, Contato, Proposta, Negociação, Fechado) e apresenta um guia de boas-vindas interativo
-2. **Given** um tenant recém-criado, **When** o usuário acessa o dashboard pela primeira vez, **Then** o sistema mostra um tutorial interativo explicando as funcionalidades principais
-3. **Given** um tenant configurado, **When** o usuário navega pelas telas principais, **Then** o sistema oferece tooltips contextuais e exemplos para facilitar o aprendizado
+1. **Given** um administrador inicial acessa o sistema pela primeira vez, **When** configura a instalação (nome da empresa, dados básicos) e cria o primeiro usuário administrador, **Then** o sistema cria automaticamente todos os recursos necessários (configurações padrão, funil de vendas padrão com etapas comuns: Lead, Contato, Proposta, Negociação, Fechado) e apresenta um guia de boas-vindas interativo
+2. **Given** uma instalação recém-configurada, **When** o usuário acessa o dashboard pela primeira vez, **Then** o sistema mostra um tutorial interativo explicando as funcionalidades principais
+3. **Given** uma instalação configurada, **When** o usuário navega pelas telas principais, **Then** o sistema oferece tooltips contextuais e exemplos para facilitar o aprendizado
 
 ---
 
@@ -65,7 +36,7 @@ Como vendedor ou gestor de vendas, quero criar e personalizar funis de vendas co
 1. **Given** um usuário autenticado, **When** cria um novo funil de vendas, **Then** o sistema permite definir nome, descrição, e etapas customizadas com ordem definida pelo usuário
 2. **Given** um funil existente, **When** o usuário edita as etapas (adiciona, renomeia, reordena), **Then** as alterações são salvas e leads/oportunidades existentes são preservados
 2. **Given** um funil com etapa contendo oportunidades, **When** o usuário tenta deletar a etapa, **Then** o sistema impede a deleção, informa quantas oportunidades estão nessa etapa, e exige que todas sejam movidas manualmente antes de permitir a deleção
-3. **Given** um funil com leads/oportunidades, **When** o usuário visualiza em formato kanban, **Then** cada card representa lead ou oportunidade mostrando informações essenciais (nome, valor quando aplicável, data de atualização, status de negociação quando aplicável como badge visível), permite hover ou expansão para ver detalhes adicionais (responsável, empresa, score), pode ser arrastado entre colunas para mudar de etapa (tanto leads quanto oportunidades), e cada coluna exibe no cabeçalho: valor total ($) calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado", e quantidade total de leads e oportunidades na coluna
+3. **Given** um funil com leads/oportunidades, **When** o usuário visualiza em formato kanban, **Then** cada card representa lead ou oportunidade mostrando informações essenciais (nome, valor quando aplicável, data de atualização, status de negociação quando aplicável como badge visível), permite hover ou expansão para ver detalhes adicionais (responsável, empresa, score), pode ser arrastado entre colunas para mudar de etapa (tanto leads quanto oportunidades), e cada coluna exibe no cabeçalho: valor total (R$) calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado", e quantidade total de leads e oportunidades na coluna
 4. **Given** um funil com oportunidades em diferentes etapas, **When** o usuário arrasta uma oportunidade ou lead de uma etapa para outra via drag-and-drop, **Then** o sistema atualiza a etapa imediatamente ao soltar o card, recalcula e atualiza em tempo real o valor total e quantidade exibidos nos cabeçalhos das colunas de origem e destino
 5. **Given** múltiplos funis criados, **When** o usuário navega entre eles, **Then** o sistema mantém o estado de visualização e filtros de cada funil independentemente
 6. **Given** um funil com oportunidades sendo visualizado, **When** o usuário alterna entre visualizações (Kanban, Lista, Tabela) usando o seletor sempre visível, **Then** o sistema exibe os mesmos dados na nova visualização mantendo filtros e configurações aplicadas, e valor total e quantidade por etapa são exibidos consistentemente em todas as visualizações
@@ -124,7 +95,7 @@ Como vendedor, quero cadastrar tarefas e anotações relacionadas a leads/oportu
 1. **Given** uma oportunidade aberta, **When** o usuário cria uma tarefa (tipo: ligar, email, reunião, etc.) com data/hora e descrição, **Then** a tarefa é salva vinculada à oportunidade e aparece no dashboard do usuário na data agendada
 2. **Given** uma oportunidade ou lead, **When** o usuário adiciona uma anotação (texto livre, possivelmente com data/hora automática), **Then** a anotação é salva no histórico da oportunidade/lead e fica visível na timeline
 3. **Given** tarefas agendadas, **When** o usuário visualiza seu dashboard, **Then** o sistema mostra lista de tarefas pendentes ordenadas por prioridade/data, permitindo marcar como concluída
-4. **Given** um usuário autenticado, **When** acessa o menu/seção "Tarefas", **Then** o sistema lista todas as tarefas do tenant (conforme permissões do usuário) ordenadas por data de execução, permitindo filtrar por responsável, status, tipo e período
+4. **Given** um usuário autenticado, **When** acessa o menu/seção "Tarefas", **Then** o sistema lista todas as tarefas (conforme permissões do usuário) ordenadas por data de execução, permitindo filtrar por responsável, status, tipo e período
 5. **Given** o menu de Tarefas com filtros aplicados, **When** o usuário visualiza a listagem, **Then** as tarefas são exibidas ordenadas por data de execução (data/hora agendada) mostrando informações essenciais (descrição, responsável, lead/oportunidade vinculada, status)
 6. **Given** uma tarefa listada no menu de Tarefas, **When** o usuário interage com a tarefa, **Then** o sistema permite visualizar detalhes, editar informações, marcar como concluída, excluir e navegar diretamente para o lead/oportunidade vinculada
 7. **Given** o menu de Tarefas, **When** o usuário acessa a visualização, **Then** o sistema mostra lista ordenada por data de execução como padrão, com opção de alternar para visualização em calendário (diário, semanal, mensal)
@@ -154,13 +125,13 @@ Como vendedor, quero cadastrar produtos/serviços, criar cotações/propostas pa
 
 Como administrador da empresa, quero definir perfis de usuário com permissões específicas e configurar distribuição automática de leads, para controlar acesso e otimizar atribuição de oportunidades.
 
-**Why this priority**: Multitenancy requer isolamento e controle de acesso. Sem permissões adequadas, o sistema não é seguro. Distribuição de leads otimiza operação de vendas.
+**Why this priority**: Single-Tenant requer isolamento e controle de acesso. Sem permissões adequadas, o sistema não é seguro. Distribuição de leads otimiza operação de vendas.
 
 **Independent Test**: Um administrador pode criar perfis de usuário (vendedor, gerente, admin) com permissões específicas, criar usuários atribuindo perfis, configurar regras de distribuição automática de leads, e o sistema distribui novos leads conforme regras definidas.
 
 **Acceptance Scenarios**:
 
-1. **Given** um administrador do tenant, **When** cria um perfil de usuário definindo permissões (visualizar, editar, deletar leads; acessar relatórios; gerenciar usuários, etc.), **Then** o perfil é salvo e pode ser atribuído a múltiplos usuários
+1. **Given** um administrador do sistema, **When** cria um perfil de usuário definindo permissões (visualizar, editar, deletar leads; acessar relatórios; gerenciar usuários, etc.), **Then** o perfil é salvo e pode ser atribuído a múltiplos usuários
 2. **Given** perfis criados, **When** o administrador cria um novo usuário atribuindo email, nome, perfil, **Then** o usuário recebe convite por email e ao aceitar tem acesso conforme permissões do perfil
 3. **Given** usuários vendedores cadastrados, **When** o administrador configura distribuição automática de leads (round-robin, por região, por origem, etc.), **Then** novos leads são automaticamente atribuídos conforme regras definidas
 4. **Given** um lead distribuído a um vendedor, **When** o vendedor visualiza seu dashboard, **Then** o lead aparece em sua lista de leads atribuídos e pode ser gerenciado
@@ -177,7 +148,7 @@ Como usuário do sistema, quero visualizar um dashboard personalizado com inform
 
 **Acceptance Scenarios**:
 
-1. **Given** um usuário autenticado, **When** acessa o dashboard, **Then** o sistema mostra widgets personalizados baseados no perfil (vendedor: suas oportunidades, tarefas; gerente: visão da equipe; admin: visão completa do tenant)
+1. **Given** um usuário autenticado, **When** acessa o dashboard, **Then** o sistema mostra widgets personalizados baseados no perfil (vendedor: suas oportunidades, tarefas; gerente: visão da equipe; admin: visão completa da instalação)
 2. **Given** um dashboard configurado, **When** o usuário filtra por período (hoje, semana, mês, customizado), **Then** todas as métricas e gráficos são atualizados para refletir o período selecionado
 3. **Given** dados no sistema, **When** o dashboard é carregado, **Then** as métricas são calculadas e exibidas rapidamente (< 2 segundos) com indicadores visuais claros (gráficos, cards, listas)
 
@@ -212,7 +183,7 @@ Como gestor, quero configurar workflows automatizados que disparem ações (tare
 1. **Given** um administrador, **When** cria regra de workflow definindo trigger (evento: lead criado, etapa alterada, etc.), condição (se aplicável), e ações (criar tarefa, enviar email, mover etapa, etc.), **Then** a regra é salva e fica ativa
 2. **Given** regras de workflow ativas, **When** evento trigger ocorre (ex: lead criado na etapa "Novo Lead"), **Then** o sistema avalia condições e executa ações configuradas automaticamente
 3. **Given** workflows executados, **When** o usuário visualiza histórico de uma oportunidade, **Then** ações automáticas são identificadas e registradas no histórico (sucessos e falhas)
-4. **Given** uma regra de workflow que cria tarefa atribuída a usuário específico, **When** o workflow dispara mas o usuário alvo foi deletado ou desativado, **Then** o sistema valida usuário antes de executar, pula a ação, registra falha em log de auditoria e notifica administrador do tenant
+4. **Given** uma regra de workflow que cria tarefa atribuída a usuário específico, **When** o workflow dispara mas o usuário alvo foi deletado ou desativado, **Then** o sistema valida usuário antes de executar, pula a ação, registra falha em log de auditoria e notifica administrador
 
 ---
 
@@ -235,38 +206,60 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 
 ### Edge Cases
 
-- O que acontece quando um usuário tenta acessar dados de outro tenant? (Isolamento multitenancy) - Sistema bloqueia acesso e retorna erro de autorização
+- Como o sistema lida com requisições com token de autenticação inválido ou expirado? - Sistema rejeita a requisição imediatamente e retorna erro de autenticação (401) sem processar qualquer operação
 - Como o sistema lida com leads duplicados na importação? - Sistema detecta por email OU telefone e oferece opções: mesclar, pular ou criar mesmo assim
-- O que acontece quando uma proposta é enviada mas o email falha? (retry, notificação)
+- O que acontece quando uma proposta é enviada mas o email falha? - Sistema exibe alerta contextual de erro ao usuário que tentou enviar, informando que envio falhou. Proposta permanece com status "rascunho" ou "pendente envio". Usuário pode tentar reenviar manualmente. Sem retry automático
 - Como o sistema lida com usuários que têm múltiplos funis ativos simultaneamente?
+- Como o sistema lida com dois usuários editando o mesmo lead/oportunidade simultaneamente? - Sistema aplica last write wins (última alteração recebida é aplicada); usuários não são alertados sobre edições concorrentes
+
 - O que acontece quando uma etapa de funil é deletada mas possui oportunidades? - Sistema impede deleção e exige que usuário mova todas as oportunidades manualmente antes
 - Como o sistema lida com permissões quando um usuário muda de perfil? - Sistema aplica novo perfil imediatamente, mantém histórico de ações com perfil anterior, e registra mudança em log de auditoria
 - O que acontece quando workflow dispara ação mas usuário alvo não existe mais? - Sistema valida usuário antes de executar, pula ação se inválido, registra em log e notifica administrador
 - Como o sistema lida com dados corrompidos na importação? (validação, rollback parcial)
+- Como o sistema aplica atualizações de versão? - Sistema é atualizado via deploy (substituição de arquivos). Migrations são executadas automaticamente no startup. Sistema cria backup automático antes de migrations, detecta versão e bloqueia inicialização se incompatível. Downtime curto durante migrations (< 1 minuto). Usuários podem precisar limpar cache do navegador após atualizações se necessário
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-#### Multitenancy e Segurança
-- **FR-001**: Sistema deve garantir isolamento estrito de dados entre tenants - nenhum tenant pode acessar dados de outro tenant sob nenhuma circunstância
-- **FR-002**: Sistema deve autenticar usuários e validar permissões em todas as operações
-- **FR-003**: Sistema deve implementar princípio do menor privilégio - usuários têm apenas permissões mínimas necessárias conforme perfil
-- **FR-004**: Sistema deve registrar auditoria de operações críticas (criação/edição/deleção de leads, alterações de permissões, etc.)
+#### Segurança e Autenticação
+- **FR-001**: Sistema deve garantir que apenas usuários autenticados e autorizados podem acessar dados, e que o controle de acesso é baseado exclusivamente em perfis/permissões de usuário. Não há isolamento entre tenants (sistema é single-tenant), mas há controle de acesso granular baseado em permissões (ex: usuário vê apenas seus leads atribuídos, gerente vê equipe, admin vê tudo)
+- **FR-001a**: Sistema deve autenticar usuários usando email/senha e validar permissões em todas as operações. Token de autenticação deve conter apenas identificador do usuário e permissões (não contém identificador de tenant, pois sistema é single-tenant)
+- **FR-001b**: Quando token de autenticação é inválido, expirado, ou usuário não existe/foi desativado, sistema deve rejeitar a requisição imediatamente e retornar erro de autenticação/autorização (401/403) sem processar qualquer operação
+- **FR-001c**: Quando usuário está desativado ou suspenso, sistema deve rejeitar requisições com token desse usuário, retornando erro de autorização (403), mesmo que o token seja válido (não expirado)
+- **FR-002**: Sistema deve implementar princípio do menor privilégio - usuários têm apenas permissões mínimas necessárias conforme perfil
+- **FR-003**: Sistema deve registrar auditoria de operações críticas (criação/edição/deleção de leads, alterações de permissões, etc.)
+
+#### Validação de Dados
+- **FR-065**: Sistema deve validar formato de telefone aceitando formatos brasileiros comuns (com/sem máscara): (11) 98765-4321, 11987654321, (11) 9876-5432. Validação aceita números com DDD (2 dígitos) + número (8 ou 9 dígitos). Apenas números são armazenados no banco (sem parênteses, traços, espaços). Exemplo de padrão de validação (para documentação/clareza, não exige uso de regex): validar que após remover caracteres não numéricos, string contém 10 ou 11 dígitos (10 dígitos = DDD 2 + número 8, 11 dígitos = DDD 2 + número 9). Regex exemplo: após normalização (remover não-dígitos), validar `^\d{10,11}$` ou equivalente. Implementação pode usar qualquer método equivalente (regex, biblioteca, validação manual)
+- **FR-066**: Sistema deve validar emails usando validação simplificada: formato básico texto@dominio.extensão (ex: usuario@exemplo.com). Verifica apenas presença de @ e estrutura básica, não segue RFC completo. Exemplo de padrão de validação (para documentação/clareza, não exige uso de regex): regex `^[^@]+@[^@]+\.[^@]+$` ou equivalente (valida: texto antes de @, @, texto após @ contendo pelo menos um ponto). Implementação pode usar qualquer método equivalente (regex, biblioteca, validação manual)
+- **FR-067**: Sistema deve ter limite máximo de R$ 99.999.999,99 para valores monetários (estimated_value, budget, unit_price, etc.). Valores acima do limite são rejeitados com mensagem de erro
+- **FR-068**: Sistema deve ter limites máximos explícitos para todos os campos de texto. Campos curtos (ex: company, source, category): 100-200 caracteres. Campos de descrição: 1000-5000 caracteres. Campos de texto longo (ex: notes content): 10000 caracteres. Valores acima do limite são rejeitados
+- **FR-069**: Campos JSON (settings, products, items, permissions) devem ter estrutura básica documentada no spec (campos principais, tipos esperados, exemplos). Validação completa de schema pode ser definida durante a implementação
+
+#### Preferências e Perfil de Usuário
+- **FR-070**: Sistema não deve ter funcionalidades de configuração de preferências pessoais para o usuário. O campo `preferences` na entidade User deve ser removido
+- **FR-071**: Sistema deve permitir que o usuário edite seu próprio perfil, incluindo foto, nome e senha. O email do usuário não pode ser alterado
+
+#### Alertas Contextuais e Notificações
+- **FR-072**: Sistema deve usar apenas alertas contextuais na interface para feedback ao usuário (ex: mensagens de confirmação, sucesso, erro após ações). Não há notificações automáticas por email ou in-app (badges, mensagens persistentes)
+- **FR-073**: Sistema deve exibir alertas contextuais de confirmação antes de ações destrutivas (excluir leads/oportunidades/tarefas, operações em lote de exclusão). Usuário deve confirmar explicitamente antes que a ação seja executada
+- **FR-074**: Sistema deve exibir alertas contextuais de validação para campos obrigatórios e erros de validação (mensagens de erro inline em formulários, indicadores visuais de campos inválidos). Validações devem ser claras e específicas
+- **FR-075**: Quando um workflow falha devido a um usuário alvo inválido, o sistema deve registrar a falha no log de auditoria (ActivityLog). Não há área específica para visualizar falhas de workflow, nem notificações automáticas
+- **FR-076**: Quando o envio de uma proposta por email falha, o sistema deve exibir um alerta contextual de erro ao usuário que tentou enviar. A proposta permanece com status "rascunho" ou "pendente envio", e o usuário pode tentar reenviar manualmente. Não há retry automático
 
 #### Funis e Pipelines
-- **FR-005**: Sistema deve permitir criação de múltiplos funis de vendas por tenant
-- **FR-006**: Sistema deve permitir que usuários criem, editem, reordenem e deletem etapas de funil
+- **FR-004**: Sistema deve permitir criação de múltiplos funis de vendas (todos compartilhados por todos os usuários da instalação, com controle de acesso via permissões)
+- **FR-005**: Sistema deve permitir que usuários criem, editem, reordenem e deletem etapas de funil
 - **FR-006a**: Sistema deve impedir deleção de etapa de funil se existirem oportunidades associadas a ela, exigindo que usuário mova/realoque todas as oportunidades manualmente antes de deletar
 - **FR-007**: Sistema deve fornecer visualização kanban de leads/oportunidades por etapa do funil
 - **FR-007a**: Cards do kanban devem exibir informações essenciais: nome do lead/oportunidade, valor (quando aplicável), e data de última atualização
 - **FR-007b**: Cards do kanban devem permitir visualizar informações adicionais (responsável, empresa, score de qualificação, etc.) via hover ou expansão do card
 - **FR-007c**: Sistema deve utilizar virtualização/lazy loading com scroll infinito nas colunas do kanban para manter performance mesmo com muitas oportunidades por etapa
-- **FR-007d**: Sistema deve adaptar visualização kanban para dispositivos móveis: colunas empilhadas verticalmente, mantendo funcionalidade de drag-and-drop entre etapas
-- **FR-007e**: Sistema deve exibir valor total ($) no cabeçalho de cada coluna/etapa do kanban, calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado"
+- **FR-007e**: Sistema deve exibir valor total (R$) no cabeçalho de cada coluna/etapa do kanban, calculando apenas oportunidades (não leads) com status "Em andamento" ou "Pausado"
 - **FR-007f**: Sistema deve exibir quantidade de leads e oportunidades no cabeçalho de cada coluna/etapa do kanban (total de cards na coluna)
-- **FR-007g**: Sistema deve exibir valor total ($) e quantidade de leads/oportunidades por etapa também nas visualizações Lista e Tabela (em cabeçalhos/seções quando agrupadas por etapa)
-- **FR-008**: Sistema deve permitir drag-and-drop de leads e oportunidades entre etapas do funil no kanban (desktop e mobile)
+- **FR-007g**: Sistema deve exibir valor total (R$) e quantidade de leads/oportunidades por etapa também nas visualizações Lista e Tabela (em cabeçalhos/seções quando agrupadas por etapa)
+- **FR-008**: Sistema deve permitir drag-and-drop de leads e oportunidades entre etapas do funil no kanban
 - **FR-008a**: Quando oportunidade é arrastada entre etapas, sistema deve atualizar automaticamente o valor total e quantidade exibidos no cabeçalho das colunas envolvidas (origem e destino) em tempo real, imediatamente após soltar o card na nova etapa
 - **FR-009**: Sistema deve fornecer visualização de lista de leads/oportunidades com colunas configuráveis e ordenação
 - **FR-010**: Sistema deve fornecer visualização de tabela de leads/oportunidades com filtros avançados e exportação
@@ -288,8 +281,14 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-013h**: Sistema deve permitir filtrar oportunidades por status de negociação nas visualizações de pipeline
 - **FR-014**: Sistema deve manter histórico completo de mudanças de etapa de oportunidades (data, usuário, etapa anterior, etapa nova)
 - **FR-014a**: Sistema deve manter histórico de mudanças de status de negociação incluindo: data, usuário, status anterior, status novo
-- **FR-015**: Sistema deve permitir atribuição manual de leads/oportunidades a usuários
+- **FR-015**: Sistema deve permitir atribuição manual de leads/oportunidades a usuários (individual ou em lote)
 - **FR-016**: Sistema deve permitir distribuição automática de leads baseada em regras configuráveis (round-robin, por região, por origem, etc.)
+- **FR-015a**: Sistema deve permitir edição em lote de leads e oportunidades (seleção múltipla e aplicação de mudanças a todos selecionados). Campos editáveis em lote: etapa do funil, status de negociação (apenas oportunidades), atribuição (assigned_user_id), origem (source)
+- **FR-015b**: Sistema deve permitir exclusão em lote de leads, oportunidades e tarefas (seleção múltipla e exclusão confirmada)
+- **FR-015c**: Sistema deve permitir atribuição em lote de leads, oportunidades e tarefas a usuários (seleção múltipla e atribuição a um usuário)
+- **FR-015d**: Sistema deve validar todos os itens antes de aplicar operações em lote; se houver erros de validação, não aplicar nenhuma mudança e mostrar lista detalhada de erros por item para correção
+- **FR-015e**: Sistema deve registrar operações em lote no log de auditoria como uma entrada agregada por operação (ex: "10 leads editados em lote", "5 oportunidades atribuídas em lote"), incluindo quantidade de itens afetados, tipo de operação e usuário responsável
+- **FR-015f**: Sistema deve validar permissões individuais para cada item em operações em lote; itens para os quais o usuário não tem permissão individual devem ser excluídos da operação ou a operação deve ser rejeitada se algum item não autorizado for selecionado
 
 #### Importação e Exportação
 - **FR-017**: Sistema deve permitir importação de leads/oportunidades via arquivo CSV ou Excel
@@ -305,7 +304,7 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-025**: Sistema deve permitir criação de anotações (texto livre com data/hora) vinculadas a leads/oportunidades
 - **FR-026**: Sistema deve manter histórico cronológico de tarefas e anotações por lead/oportunidade
 - **FR-027**: Sistema deve permitir marcar tarefas como concluídas e mostrar status no dashboard
-- **FR-027a**: Sistema deve fornecer menu/seção dedicada "Tarefas" listando todas as tarefas do tenant ordenadas por data de execução (data/hora agendada)
+- **FR-027a**: Sistema deve fornecer menu/seção dedicada "Tarefas" listando todas as tarefas (conforme permissões do usuário) ordenadas por data de execução (data/hora agendada)
 - **FR-027b**: Menu de Tarefas deve permitir filtrar por responsável, status (pendente/concluída), tipo de tarefa e período (hoje, semana, mês, período customizado)
 - **FR-027c**: Menu de Tarefas deve respeitar permissões de visualização conforme perfil do usuário (usuário vê suas tarefas + equipe se permitido, gerente vê equipe, admin vê todas)
 - **FR-027d**: Menu de Tarefas deve permitir realizar ações: visualizar detalhes, editar, marcar como concluída, excluir e navegar para lead/oportunidade vinculada
@@ -322,11 +321,14 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-032**: Sistema deve permitir envio de propostas por email com PDF anexado
 
 #### Usuários, Perfis e Permissões
-- **FR-033**: Sistema deve permitir criação de perfis de usuário com permissões granulares (visualizar/editar/deletar leads, acessar relatórios, gerenciar usuários, etc.)
+- **FR-033**: Sistema deve permitir criação de perfis de usuário com permissões granulares por recurso e ação. Cada recurso (leads, oportunidades, tarefas, anotações, propostas, produtos, templates de email, workflows, relatórios, usuários, perfis, funis) suporta ações básicas: read (visualizar), write (criar/editar), delete (excluir). Alguns recursos podem ter ações específicas adicionais (ex: users também tem "manage" para gerenciamento completo)
+- **FR-033a**: Sistema deve aplicar hierarquia implícita entre ações de permissão: write (criar/editar) implica automaticamente read (visualizar), delete implica automaticamente read (não pode deletar sem visualizar). Delete não requer write (pode deletar mesmo sem editar)
+- **FR-033b**: Sistema deve aplicar filtros automáticos baseados em atribuição combinados com permissões de recurso. Permissões de recurso (ex: "leads:read") controlam acesso ao recurso. Filtros baseados em atribuição são aplicados automaticamente quando relevante (ex: usuário sem permissão especial vê apenas seus próprios leads atribuídos, gerente vê da equipe, admin vê todos)
+- **FR-033c**: Sistema deve determinar escopo de visão (próprios, equipe, todos) automaticamente baseado no perfil do usuário e permissões existentes. Perfis padrão têm escopos pré-definidos (ex: perfil "admin" vê todos, perfil "gerente" vê equipe, perfil "vendedor" vê apenas seus próprios). Sem permissões de escopo explícitas
 - **FR-034**: Sistema deve permitir criação de usuários atribuindo perfil, email, nome
 - **FR-035**: Sistema deve enviar convite por email para novos usuários
 - **FR-036**: Sistema deve permitir que usuários redefinam senha via email
-- **FR-037**: Sistema deve permitir edição de perfil do próprio usuário (nome, senha, preferências)
+- **FR-037**: Sistema deve permitir que usuário edite seu próprio perfil: foto, nome, senha. Email não pode ser alterado
 - **FR-037a**: Sistema deve permitir alteração de perfil de usuário (atribuição de novo perfil), aplicando novas permissões imediatamente
 - **FR-037b**: Sistema deve manter histórico de ações do usuário com referência ao perfil que tinha no momento da ação, preservando contexto de auditoria
 - **FR-037c**: Sistema deve registrar mudanças de perfil de usuário em log de auditoria incluindo: usuário alterado, perfil anterior, perfil novo, quem fez a alteração, data/hora
@@ -350,7 +352,7 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 - **FR-047**: Sistema deve permitir criação de regras de workflow com trigger (eventos: lead criado, etapa alterada, etc.), condições opcionais, e ações (criar tarefa, enviar email, mover etapa)
 - **FR-048**: Sistema deve executar workflows automaticamente quando triggers ocorrem e condições são atendidas
 - **FR-048a**: Sistema deve validar existência e status de usuários alvo antes de executar ações de workflow que referenciam usuários
-- **FR-048b**: Sistema deve pular ação de workflow se usuário alvo for inválido (não existe ou está desativado), registrar falha em log de auditoria e notificar administrador do tenant
+- **FR-048b**: Sistema deve pular ação de workflow se usuário alvo for inválido (não existe ou está desativado), registrar falha em log de auditoria (ActivityLog). Administrador pode consultar o log quando necessário. Sem notificações automáticas
 - **FR-049**: Sistema deve registrar execuções de workflow no histórico de oportunidades (sucessos e falhas)
 - **FR-050**: Sistema deve permitir ativar/desativar workflows individualmente
 
@@ -365,22 +367,35 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 #### Performance e Usabilidade
 - **FR-055**: Sistema deve responder a 95% das requisições de API em menos de 200ms
 - **FR-056**: Sistema deve funcionar corretamente em navegadores modernos (Chrome, Firefox, Safari, Edge - versões dos últimos 2 anos)
-- **FR-057**: Sistema deve ser responsivo e utilizável em dispositivos móveis (tablets e smartphones), adaptando visualizações (kanban com colunas verticais, lista compacta, etc.) conforme tamanho da tela
 - **FR-058**: Sistema deve fornecer feedback visual claro para todas as ações do usuário (loading, sucesso, erro)
+
+#### Internacionalização e Localização
+- **FR-060**: Sistema deve permitir configuração de fuso horário por organização/instalação (ex: America/Sao_Paulo). Datas/horas devem ser armazenadas em UTC no banco de dados e convertidas para o fuso horário da organização na exibição. Todos os usuários da instalação veem datas/horas no mesmo fuso horário
+- **FR-061**: Sistema deve formatar datas e horas usando formatos fixos padrão brasileiro: DD/MM/YYYY para datas, HH:mm para horas, DD/MM/YYYY HH:mm para data+hora completa. Formatos são consistentes para todas as instalações, sem configuração
+- **FR-062**: Sistema deve usar Real Brasileiro (R$) como moeda padrão para todas as instalações. Valores monetários devem ser formatados como R$ 1.234,56 (ponto para separador de milhares, vírgula para decimais). Moeda é fixa, sem configuração
+- **FR-063**: Sistema deve formatar números não monetários (quantidades, porcentagens, scores) usando formatos fixos padrão brasileiro: ponto para separador de milhares, vírgula para decimais (ex: 1.234 para inteiros, 1.234,56 para decimais, 12,34% para porcentagens). Formatos são consistentes para todas as instalações, sem configuração
+- **FR-064**: Interface do sistema deve ser desenvolvida exclusivamente em português brasileiro (PT-BR). Não há suporte a múltiplos idiomas; textos, mensagens, labels, ajuda e documentação estão apenas em PT-BR
+
+#### Manutenção e Atualização
+- **FR-059**: Sistema deve aplicar migrations de schema do banco de dados automaticamente no startup, detectando versão atual do schema e aplicando migrations pendentes
+- **FR-059a**: Sistema deve criar backup automático do arquivo SQLite antes de aplicar cada migration, mantendo backups das últimas N versões (ex: 3-5 backups) para permitir restauração em caso de falha
+- **FR-059b**: Sistema deve detectar versão do schema no banco e comparar com versão esperada pelo código. Se incompatível, sistema deve bloquear inicialização e exigir rollback manual (restaurar backup) ou migration manual, registrando erro detalhado
+- **FR-059c**: Durante aplicação de migrations no startup, sistema deve ter downtime curto (sistema pausa recebimento de novas requisições, aplica migrations automaticamente, reinicia). Usuários não podem acessar durante atualização (geralmente < 1 minuto)
+- **FR-059d**: Sistema é atualizado através de processo de deploy (substituição de arquivos). Migrations são executadas automaticamente no startup após deploy. Usuários podem precisar limpar cache do navegador após atualizações se necessário
 
 ### Key Entities *(include if feature involves data)*
 
-- **Tenant**: Representa uma empresa cliente do SaaS. Possui configurações próprias, usuários, funis, produtos. Isolamento total de dados entre tenants.
+- **Organization/Empresa**: Representa a empresa/organização que usa o sistema. Entidade única por instalação, armazena nome, configurações gerais, dados básicos configurados durante onboarding inicial. Dados são utilizados em relatórios, propostas, emails, etc.
 
-- **User**: Representa um usuário do sistema pertencente a um tenant. Possui email, nome, perfil, preferências. Autenticação e autorização baseada em tenant + perfil.
+- **User**: Representa um usuário do sistema. Possui email, nome, foto, perfil. Autenticação baseada em email/senha. Autorização baseada em perfil/permissões. Usuário pode editar seu próprio perfil: foto, nome, senha. Email não pode ser alterado. Todos os usuários acessam os mesmos dados da instalação (com controle via permissões).
 
-- **Profile**: Representa um conjunto de permissões. Definido por tenant, pode ser atribuído a múltiplos usuários. Permissões granulares por recurso (leads, oportunidades, relatórios, usuários, etc.).
+- **Profile**: Representa um conjunto de permissões. Definido globalmente para a instalação, pode ser atribuído a múltiplos usuários. Permissões granulares por recurso (leads, oportunidades, tarefas, anotações, propostas, produtos, templates de email, workflows, relatórios, usuários, perfis, funis) e ação (read, write, delete, e ações específicas quando aplicável). Sistema aplica hierarquia implícita (write implica read, delete implica read) e filtros automáticos baseados em atribuição determinados pelo perfil.
 
-- **Funnel**: Representa um funil de vendas. Pertence a um tenant, possui nome, descrição, etapas ordenadas. Um tenant pode ter múltiplos funis.
+- **Funnel**: Representa um funil de vendas. Possui nome, descrição, etapas ordenadas. Múltiplos funis podem existir para organizar diferentes processos de venda. Todos os funis são compartilhados por todos os usuários (com controle de acesso via permissões).
 
 - **FunnelStage**: Representa uma etapa dentro de um funil. Pertence a um funil, possui nome, ordem, propriedades (cor, ícone). Etapas são editáveis e reordenáveis.
 
-- **Lead**: Representa um lead de vendas. Pertence a um tenant e funil, possui dados de contato (nome, empresa, email, telefone), qualificação (score, interesse, orçamento, timeline), origem, etapa atual, usuário atribuído, data de criação/atualização.
+- **Lead**: Representa um lead de vendas. Pertence a um funil, possui dados de contato (nome, empresa, email, telefone), qualificação (score, interesse, orçamento, timeline), origem, etapa atual, usuário atribuído, data de criação/atualização.
 
 - **Opportunity**: Representa uma oportunidade de venda (lead convertido). Estende Lead com valor estimado, produtos/serviços associados, propostas criadas. Movimenta-se entre etapas do funil. Possui status de negociação (Em andamento, Pausado, Vendido, Perdido) independente da etapa do funil.
 
@@ -388,13 +403,13 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 
 - **Note**: Representa uma anotação. Vinculada a lead/oportunidade, possui texto livre, data/hora de criação, autor. Histórico cronológico.
 
-- **Product/Service**: Representa um produto ou serviço vendável. Pertence a um tenant, possui nome, descrição, preço unitário, categoria, status (ativo/inativo).
+- **Product/Service**: Representa um produto ou serviço vendável. Possui nome, descrição, preço unitário, categoria, status (ativo/inativo).
 
 - **Proposal**: Representa uma proposta comercial. Vinculada a uma oportunidade, possui lista de produtos com quantidades, descontos aplicados, totais calculados, status (rascunho, enviada, aceita, recusada), data de criação/envio.
 
-- **EmailTemplate**: Representa um template de email. Pertence a um tenant, possui nome, assunto, corpo com variáveis dinâmicas, tipo (proposta, follow-up, etc.).
+- **EmailTemplate**: Representa um template de email. Possui nome, assunto, corpo com variáveis dinâmicas, tipo (proposta, follow-up, etc.).
 
-- **WorkflowRule**: Representa uma regra de workflow automatizado. Pertence a um tenant, possui trigger (evento), condições opcionais, ações a executar, status (ativo/inativo).
+- **WorkflowRule**: Representa uma regra de workflow automatizado. Possui trigger (evento), condições opcionais, ações a executar, status (ativo/inativo).
 
 - **ActivityLog**: Representa log de atividades. Registra ações do sistema (criação de lead, mudança de etapa, envio de email, execução de workflow) com timestamp, usuário/sistema, detalhes.
 
@@ -404,24 +419,22 @@ Como gestor ou administrador, quero gerar relatórios e análises sobre performa
 
 - **SC-001**: Usuários podem completar onboarding inicial (criar conta, configurar primeiro funil, adicionar produto, criar primeiro lead) em menos de 10 minutos sem assistência externa
 
-- **SC-002**: Sistema suporta 100 tenants simultâneos com isolamento completo de dados (0% de vazamento de dados entre tenants)
+- **SC-002**: Sistema responde a 95% das requisições de API em menos de 200ms
 
-- **SC-003**: Sistema responde a 95% das requisições de API em menos de 200ms
+- **SC-003**: Dashboard carrega e exibe métricas em menos de 2 segundos para 95% dos acessos
 
-- **SC-004**: Dashboard carrega e exibe métricas em menos de 2 segundos para 95% dos acessos
+- **SC-004**: Usuários podem importar arquivo com até 1000 leads em menos de 30 segundos com validação completa
 
-- **SC-005**: Usuários podem importar arquivo com até 1000 leads em menos de 30 segundos com validação completa
+- **SC-005**: Sistema permite criação e edição de funil com até 10 etapas em menos de 5 segundos
 
-- **SC-006**: Sistema permite criação e edição de funil com até 10 etapas em menos de 5 segundos
+- **SC-006**: Visualização kanban suporta até 100 oportunidades por etapa sem degradação de performance perceptível, utilizando virtualização/lazy loading com scroll infinito
 
-- **SC-007**: Visualização kanban suporta até 100 oportunidades por etapa sem degradação de performance perceptível, utilizando virtualização/lazy loading com scroll infinito
+- **SC-007**: 90% dos usuários conseguem criar e enviar uma proposta completa (produtos, valores, PDF, email) em menos de 5 minutos na primeira tentativa
 
-- **SC-008**: 90% dos usuários conseguem criar e enviar uma proposta completa (produtos, valores, PDF, email) em menos de 5 minutos na primeira tentativa
+- **SC-008**: Workflows automatizados executam ações em menos de 5 segundos após trigger
 
-- **SC-009**: Workflows automatizados executam ações em menos de 5 segundos após trigger
+- **SC-009**: Sistema processa e distribui automaticamente novos leads de formulários web em menos de 10 segundos após submissão
 
-- **SC-010**: Sistema processa e distribui automaticamente novos leads de formulários web em menos de 10 segundos após submissão
-
-- **SC-011**: Usuários podem gerar e visualizar relatório completo (com filtros aplicados) em menos de 3 segundos
+- **SC-010**: Usuários podem gerar e visualizar relatório completo (com filtros aplicados) em menos de 3 segundos
 
 - **SC-012**: 95% das operações de criação/edição de leads e oportunidades são concluídas sem erros na primeira tentativa

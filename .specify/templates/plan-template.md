@@ -33,7 +33,6 @@
 
 Verificar conformidade com os princípios da Constituição Stela CRM:
 
-- ✅ **Multitenancy**: Como será garantido isolamento de dados por tenant?
 - ✅ **API First**: APIs definidas e documentadas antes da UI?
 - ✅ **Library First**: Funcionalidades complexas serão bibliotecas independentes?
 - ✅ **Cloud Native**: Arquitetura compatível com nuvem (12-Factor App)?

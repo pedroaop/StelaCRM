@@ -1,146 +1,163 @@
 # StelaCRM
 
-> Plataforma SaaS Multitenant para gestão de vendas e relacionamento com clientes
-
-[![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)](https://github.com)
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+Sistema de CRM (Customer Relationship Management) SaaS Single-Tenant desenvolvido para pequenas empresas que precisam de uma solução simples, flexível e eficiente para gerenciar vendas e relacionamento com clientes.
 
 ## 📋 Sobre o Projeto
 
-O **StelaCRM** é uma solução SaaS multitenant desenvolvida especificamente para pequenas empresas que buscam obter sucesso nas vendas através de uma ferramenta simples, flexível e poderosa.
+O StelaCRM é uma plataforma completa de gestão de relacionamento com clientes e vendas, projetada especificamente para atender às necessidades de pequenas empresas. Com uma interface intuitiva e funcionalidades robustas, o sistema permite gerenciar todo o ciclo de vendas desde a captação de leads até o fechamento de negócios.
 
-Nosso objetivo é proporcionar uma experiência de uso intuitiva, onde empresas possam configurar e começar a usar o sistema em minutos, sem necessidade de treinamento extensivo ou suporte constante.
+## ✨ Funcionalidades Principais
 
-### 🎯 Objetivos Principais
+### 📊 Funis e Pipelines
+- Múltiplos funis de vendas personalizáveis
+- Etapas editáveis e reordenáveis
+- Visualizações flexíveis: Kanban, Lista e Tabela
+- Cálculo automático de valores por etapa
+- Drag-and-drop para movimentação entre etapas
 
-- **Simplicidade**: Interface intuitiva e fácil de usar
-- **Flexibilidade**: Adapte o sistema às necessidades do seu negócio
-- **Autonomia**: Self-service onboarding - configure sozinho em minutos
-- **Performance**: Respostas rápidas, operações não-bloqueantes
-- **Segurança**: Isolamento estrito de dados por cliente (Multitenancy)
+### 👥 Gerenciamento de Leads e Oportunidades
+- Cadastro e qualificação de leads
+- Sistema de score para priorização
+- Conversão de leads em oportunidades
+- Status de negociação independente (Em andamento, Pausado, Vendido, Perdido)
+- Histórico completo de mudanças
 
-## ✨ Principais Funcionalidades
+### 📥 Importação e Exportação
+- Importação de leads via CSV/Excel
+- Exportação de dados para análise
+- Validação e tratamento de duplicados
+- Mapeamento de colunas personalizado
 
-### 🚀 Core (P1 - MVP)
+### ✅ Tarefas e Anotações
+- Criação de tarefas vinculadas a leads/oportunidades
+- Anotações com histórico cronológico
+- Visualização em lista e calendário
+- Filtros e busca avançada
 
-- **✅ Funis de Vendas Customizáveis**
-  - Múltiplos funis por tenant
-  - Etapas editáveis, reordenáveis e personalizáveis
-  - Visualização Kanban, Lista e Tabela
+### 💼 Produtos, Serviços e Propostas
+- Cadastro de produtos e serviços
+- Criação de cotações e propostas
+- Geração automática de PDF
+- Envio de propostas por e-mail
 
-- **✅ Gerenciamento de Leads e Oportunidades**
-  - Cadastro manual de leads
-  - Qualificação com score e campos customizáveis
-  - Conversão de leads em oportunidades
-  - Histórico completo de movimentações
+### 🔐 Perfis e Permissões
+- Sistema de perfis com permissões granulares
+- Controle de acesso por recurso e ação
+- Distribuição automática de leads
+- Dashboard personalizado por perfil
 
-- **✅ Onboarding Self-Service**
-  - Configuração inicial em menos de 10 minutos
-  - Funil padrão pré-configurado
-  - Tutorial interativo e tooltips contextuais
+### 📈 Dashboard e Relatórios
+- Métricas personalizadas por usuário
+- Visualização de pipeline e conversão
+- Relatórios de performance
+- Exportação em PDF e Excel
 
-### 📊 Funcionalidades Essenciais (P2)
+### 🔗 Integrações
+- Integração com formulários web (webhook)
+- Envio de e-mails automatizados
+- Templates de e-mail personalizáveis
+- Workflows automatizados
 
-- **Importação/Exportação**: CSV/Excel para leads e oportunidades
-- **Tarefas e Anotações**: Organize follow-ups e histórico de interações
-- **Produtos e Propostas**: Cadastre produtos, gere cotações e envie PDFs
-- **Perfis e Permissões**: Controle de acesso granular por usuário
-- **Distribuição de Leads**: Regras automáticas de atribuição
-- **Dashboard Personalizado**: Métricas relevantes por perfil
+### ⚙️ Workflows Automatizados
+- Regras baseadas em eventos
+- Ações automáticas (tarefas, e-mails)
+- Execução condicional
+- Histórico de execuções
 
-### 🔧 Funcionalidades Avançadas (P3)
+## 🎯 Público-Alvo
 
-- **Integração com Formulários**: Webhooks e código de embed
-- **Email Marketing**: Templates, envio manual e automatizado
-- **Workflows Automatizados**: Ações automáticas baseadas em eventos
-- **Relatórios e Analytics**: Conversão, performance e pipeline
+Pequenas empresas que buscam:
+- Solução simples e intuitiva
+- Flexibilidade para adaptar processos
+- Controle completo sobre seus dados (single-tenant)
+- Gestão eficiente do ciclo de vendas
+- Relatórios e análises de performance
 
-## 🏗️ Arquitetura e Princípios
+## 🚀 Começando
 
-O StelaCRM é desenvolvido seguindo princípios rigorosos definidos na [Constituição do Projeto](.specify/memory/constitution.md):
+### Pré-requisitos
 
-### Princípios Fundamentais
+[Documentar tecnologias e versões necessárias quando disponível]
 
-1. **Multitenancy**: Isolamento estrito de dados por cliente
-2. **API First**: API é o produto principal, UI é consumidor
-3. **Library First**: Funcionalidades complexas como bibliotecas independentes
-4. **Cloud Native**: Arquitetura nativa de nuvem (12-Factor App)
-5. **Non-Blocking**: Usuário nunca bloqueado esperando servidor
-6. **Self-Service Onboarding**: Produto se vende e se explica sozinho
-7. **Sensible Defaults**: Funciona "out of the box"
-8. **Test First (TDD)**: Desenvolvimento orientado por testes (obrigatório)
-9. **Least Privilege**: Menor privilégio em acessos e permissões
-10. **SOLID**: Princípios de design orientado a objetos
-11. **Clean Code & Clean Architecture**: Código limpo e arquitetura em camadas
-12. **DRY, KISS, YAGNI**: Evitar duplicação, manter simples, implementar só o necessário
-13. **Design Patterns**: Soluções comprovadas para problemas recorrentes
+### Instalação
 
-## 📁 Estrutura do Projeto
+[Instruções de instalação serão adicionadas durante o desenvolvimento]
 
-```
-stela-crm/
-├── .specify/                 # Especificações e templates do projeto
-│   ├── memory/
-│   │   └── constitution.md   # Constituição do projeto (princípios e regras)
-│   └── templates/            # Templates para specs, planos e tarefas
-├── specs/                    # Especificações de features
-│   └── 1-stela-crm/
-│       ├── spec.md           # Especificação completa do StelaCRM
-│       └── checklists/       # Checklists de validação
-└── README.md                 # Este arquivo
-```
+### Configuração Inicial
 
-## 📚 Documentação
+O sistema permite um onboarding rápido e intuitivo:
+1. Configuração inicial da empresa
+2. Criação do primeiro usuário administrador
+3. Configuração do primeiro funil de vendas
+4. Cadastro de produtos/serviços
+5. Criação do primeiro lead
 
-- **[Especificação Completa](specs/1-stela-crm/spec.md)**: Detalhamento de todas as funcionalidades, user stories e requisitos
-- **[Constituição do Projeto](.specify/memory/constitution.md)**: Princípios, regras e padrões de desenvolvimento
-- **[Checklist de Requisitos](specs/1-stela-crm/checklists/requirements.md)**: Validação da especificação
+**Tempo estimado:** Menos de 10 minutos
 
-## 🚀 Status do Projeto
+## 📖 Documentação
 
-**Status Atual**: 📝 Especificação Completa
+A documentação completa do projeto está disponível na pasta `specs/`:
+- **Especificação técnica**: `specs/1-stela-crm/spec.md`
+- **Plano de desenvolvimento**: `specs/main/plan.md`
+- **Checklist de requisitos**: `specs/1-stela-crm/checklists/requirements.md`
 
-- ✅ Constituição do projeto definida
-- ✅ Especificação completa criada (11 user stories, 56 requisitos funcionais)
-- ✅ Checklist de qualidade validado
-- 🔄 Planejamento técnico (próximo passo)
-- ⏳ Implementação (a iniciar)
+## 🏗️ Arquitetura
 
-## 🎯 Critérios de Sucesso
+[Detalhes de arquitetura serão adicionados durante o desenvolvimento]
 
-O StelaCRM será considerado bem-sucedido quando:
+### Principais Entidades
 
-- ✅ Usuários completam onboarding em menos de 10 minutos sem assistência
-- ✅ Sistema responde 95% das requisições em menos de 200ms
-- ✅ Dashboard carrega em menos de 2 segundos
-- ✅ Isolamento total de dados entre tenants (0% de vazamento)
-- ✅ 90% dos usuários conseguem criar e enviar proposta completa em menos de 5 minutos
+- **Organization**: Empresa/organização
+- **User**: Usuários do sistema
+- **Profile**: Perfis de permissões
+- **Funnel**: Funis de vendas
+- **Lead**: Leads de vendas
+- **Opportunity**: Oportunidades de venda
+- **Task**: Tarefas
+- **Note**: Anotações
+- **Product/Service**: Produtos e serviços
+- **Proposal**: Propostas comerciais
+- **WorkflowRule**: Regras de workflow
+- **ActivityLog**: Log de atividades
 
-## 🔐 Segurança
+## 🔒 Segurança
 
-- **Multitenancy**: Isolamento estrito de dados por tenant
-- **Autenticação**: Autenticação segura com tokens
-- **Autorização**: Controle de acesso baseado em perfis e permissões granulares
-- **Auditoria**: Log de operações críticas
-- **Princípio do Menor Privilégio**: Usuários têm apenas permissões mínimas necessárias
+- Autenticação baseada em email/senha
+- Sistema de permissões granular
+- Princípio do menor privilégio
+- Log de auditoria para operações críticas
+- Validação de dados em todas as entradas
+
+## 🌍 Localização
+
+- Idioma: Português Brasileiro (PT-BR)
+- Moeda: Real Brasileiro (R$)
+- Formato de data: DD/MM/YYYY
+- Formato de hora: HH:mm
+- Fuso horário configurável por organização
+
+## 📊 Métricas de Performance
+
+O sistema foi projetado para atender aos seguintes critérios de performance:
+- 95% das requisições de API respondem em menos de 200ms
+- Dashboard carrega em menos de 2 segundos
+- Importação de até 1000 leads em menos de 30 segundos
+- Visualização kanban suporta até 100 oportunidades por etapa
 
 ## 🤝 Contribuindo
 
-Este é um projeto em desenvolvimento ativo. Para contribuir:
-
-1. Leia a [Constituição do Projeto](.specify/memory/constitution.md)
-2. Revise a [Especificação](specs/1-stela-crm/spec.md)
-3. Siga os princípios de Clean Code e TDD
-4. Garanta que todos os testes passem antes de submeter alterações
+[Diretrizes de contribuição serão adicionadas]
 
 ## 📝 Licença
 
-Este projeto está licenciado sob a [MIT License](LICENSE).
+[Informações de licença serão adicionadas]
 
-## 📞 Contato
+## 📧 Contato
 
-Para dúvidas, sugestões ou colaborações, entre em contato através dos canais oficiais do projeto.
+[Informações de contato serão adicionadas]
 
 ---
 
-**Desenvolvido com ❤️ seguindo princípios de Clean Architecture e Best Practices**
+**Status do Projeto:** Em desenvolvimento
+
+Para mais informações, consulte a [especificação completa](./specs/1-stela-crm/spec.md).
