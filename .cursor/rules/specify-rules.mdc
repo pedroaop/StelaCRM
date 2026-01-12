@@ -1,0 +1,30 @@
+﻿# stela-crm Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-01-11
+
+## Active Technologies
+
+- Go 1.21+ (nativo) + PocketBase (framework backend), Go Templates (html/template), HTMX 1.x (frontend interatividade) (main)
+
+## Project Structure
+
+```text
+backend/
+frontend/
+tests/
+```
+
+## Commands
+
+# Add commands for Go 1.21+ (nativo)
+
+## Code Style
+
+Go 1.21+ (nativo): Follow standard conventions
+
+## Recent Changes
+
+- main: Added Go 1.21+ (nativo) + PocketBase (framework backend), Go Templates (html/template), HTMX 1.x (frontend interatividade)
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

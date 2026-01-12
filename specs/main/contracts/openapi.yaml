@@ -1,0 +1,985 @@
+openapi: 3.0.3
+info:
+  title: StelaCRM API
+  description: |
+    API REST do StelaCRM - Plataforma SaaS Single-Tenant para gerenciamento de vendas.
+    
+    Sistema desenvolvido em Go utilizando PocketBase como framework backend.
+    PocketBase fornece APIs REST nativas para todas as collections (CRUD).
+    
+    Esta documentação descreve as APIs principais do sistema, incluindo:
+    - Autenticação (via PocketBase)
+    - APIs de collections (CRUD padrão do PocketBase)
+    - APIs customizadas (quando aplicável)
+  
+  version: 1.0.0
+  contact:
+    name: StelaCRM Team
+
+servers:
+  - url: http://localhost:8090
+    description: Servidor de desenvolvimento
+  - url: https://api.stelacrm.example.com
+    description: Servidor de produção
+
+tags:
+  - name: Authentication
+    description: Autenticação e autorização (PocketBase padrão)
+  - name: Users
+    description: Gerenciamento de usuários
+  - name: Profiles
+    description: Perfis de permissões
+  - name: Organizations
+    description: Configurações da organização
+  - name: Funnels
+    description: Funis de vendas
+  - name: FunnelStages
+    description: Etapas de funis
+  - name: Leads
+    description: Gerenciamento de leads
+  - name: Opportunities
+    description: Gerenciamento de oportunidades
+  - name: Tasks
+    description: Tarefas
+  - name: Notes
+    description: Anotações
+  - name: Products
+    description: Produtos e serviços
+  - name: Proposals
+    description: Propostas comerciais
+  - name: EmailTemplates
+    description: Templates de email
+  - name: Workflows
+    description: Workflows automatizados
+  - name: ActivityLog
+    description: Log de atividades
+
+paths:
+  # Authentication (PocketBase padrão)
+  /api/collections/users/auth-with-password:
+    post:
+      tags:
+        - Authentication
+      summary: Autenticar usuário (email/senha)
+      description: Autentica usuário usando email e senha. Retorna token de autenticação.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - identity
+                - password
+              properties:
+                identity:
+                  type: string
+                  format: email
+                  description: Email do usuário
+                  example: usuario@exemplo.com
+                password:
+                  type: string
+                  format: password
+                  description: Senha do usuário
+      responses:
+        '200':
+          description: Autenticação bem-sucedida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/collections/users/auth-refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Renovar token de autenticação
+      description: Renova o token de autenticação usando o token atual.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Token renovado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  # Users (PocketBase padrão + customizações)
+  /api/collections/users/records:
+    get:
+      tags:
+        - Users
+      summary: Listar usuários
+      description: Lista usuários conforme permissões do usuário autenticado.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  totalItems:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Users
+      summary: Criar usuário
+      description: Cria novo usuário (requer permissão de gerenciamento de usuários).
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '200':
+          description: Usuário criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/collections/users/records/{id}:
+    get:
+      tags:
+        - Users
+      summary: Obter usuário por ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Dados do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Users
+      summary: Atualizar usuário
+      description: Atualiza dados do usuário. Usuário pode editar apenas seu próprio perfil (foto, nome, senha). Email não pode ser alterado.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Usuário atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Users
+      summary: Deletar usuário
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Usuário deletado com sucesso
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Leads
+  /api/collections/leads/records:
+    get:
+      tags:
+        - Leads
+      summary: Listar leads
+      description: Lista leads conforme permissões e filtros aplicados.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Lista de leads
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  totalItems:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Lead'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Leads
+      summary: Criar lead
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadCreate'
+      responses:
+        '200':
+          description: Lead criado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/collections/leads/records/{id}:
+    get:
+      tags:
+        - Leads
+      summary: Obter lead por ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Dados do lead
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Leads
+      summary: Atualizar lead
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadUpdate'
+      responses:
+        '200':
+          description: Lead atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Leads
+      summary: Deletar lead
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Lead deletado com sucesso
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Opportunities
+  /api/collections/opportunities/records:
+    get:
+      tags:
+        - Opportunities
+      summary: Listar oportunidades
+      description: Lista oportunidades conforme permissões e filtros aplicados.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PerPage'
+        - $ref: '#/components/parameters/Sort'
+        - $ref: '#/components/parameters/Filter'
+      responses:
+        '200':
+          description: Lista de oportunidades
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  page:
+                    type: integer
+                  perPage:
+                    type: integer
+                  totalItems:
+                    type: integer
+                  totalPages:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Opportunity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags:
+        - Opportunities
+      summary: Criar oportunidade
+      description: Cria nova oportunidade. Status padrão "Em andamento" é atribuído automaticamente.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityCreate'
+      responses:
+        '200':
+          description: Oportunidade criada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/collections/opportunities/records/{id}:
+    get:
+      tags:
+        - Opportunities
+      summary: Obter oportunidade por ID
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Dados da oportunidade
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags:
+        - Opportunities
+      summary: Atualizar oportunidade
+      description: Atualiza oportunidade. Mudanças de etapa e status são registradas no histórico.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OpportunityUpdate'
+      responses:
+        '200':
+          description: Oportunidade atualizada com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags:
+        - Opportunities
+      summary: Deletar oportunidade
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Oportunidade deletada com sucesso
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  # Batch Operations (Custom API)
+  /api/batch/leads:
+    post:
+      tags:
+        - Leads
+      summary: Operações em lote de leads
+      description: Aplica operações em lote (editar, deletar, atribuir) a múltiplos leads selecionados.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - operation
+                - ids
+              properties:
+                operation:
+                  type: string
+                  enum: [update, delete, assign]
+                  description: Tipo de operação
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: IDs dos leads
+                data:
+                  type: object
+                  description: Dados para operação (update/assign)
+                  properties:
+                    stage_id:
+                      type: string
+                    assigned_user_id:
+                      type: string
+                    source:
+                      type: string
+      responses:
+        '200':
+          description: Operação em lote executada com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: integer
+                    description: Quantidade de itens processados com sucesso
+                  errors:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        error:
+                          type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Token de autenticação PocketBase
+
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+      description: ID do registro
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        default: 1
+      description: Número da página
+    PerPage:
+      name: perPage
+      in: query
+      schema:
+        type: integer
+        default: 30
+        maximum: 500
+      description: Itens por página
+    Sort:
+      name: sort
+      in: query
+      schema:
+        type: string
+      description: Ordenação (ex: "-created,name")
+    Filter:
+      name: filter
+      in: query
+      schema:
+        type: string
+      description: Filtro (ex: "stage_id='stage123'")
+
+  schemas:
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: Token de autenticação
+        record:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+          maxLength: 200
+        avatar:
+          type: string
+          format: uri
+        profile:
+          type: string
+          description: ID do perfil
+        verified:
+          type: boolean
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+
+    UserCreate:
+      type: object
+      required:
+        - email
+        - password
+        - name
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+        passwordConfirm:
+          type: string
+          format: password
+        name:
+          type: string
+          maxLength: 200
+        profile:
+          type: string
+
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          maxLength: 200
+        avatar:
+          type: string
+        password:
+          type: string
+          format: password
+        passwordConfirm:
+          type: string
+          format: password
+        profile:
+          type: string
+
+    Lead:
+      type: object
+      properties:
+        id:
+          type: string
+        funnel_id:
+          type: string
+        stage_id:
+          type: string
+        assigned_user_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          maxLength: 200
+        company:
+          type: string
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        phone:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 200
+        qualification_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          nullable: true
+        qualification_data:
+          type: object
+          nullable: true
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+
+    LeadCreate:
+      type: object
+      required:
+        - funnel_id
+        - stage_id
+        - name
+      properties:
+        funnel_id:
+          type: string
+        stage_id:
+          type: string
+        assigned_user_id:
+          type: string
+        name:
+          type: string
+          maxLength: 200
+        company:
+          type: string
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        phone:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 200
+        qualification_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        qualification_data:
+          type: object
+
+    LeadUpdate:
+      type: object
+      properties:
+        stage_id:
+          type: string
+        assigned_user_id:
+          type: string
+        name:
+          type: string
+          maxLength: 200
+        company:
+          type: string
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        phone:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 200
+        qualification_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+        qualification_data:
+          type: object
+
+    Opportunity:
+      type: object
+      properties:
+        id:
+          type: string
+        lead_id:
+          type: string
+          nullable: true
+        funnel_id:
+          type: string
+        stage_id:
+          type: string
+        assigned_user_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          maxLength: 200
+        company:
+          type: string
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        phone:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 200
+        estimated_value:
+          type: number
+          format: decimal
+          maximum: 99999999.99
+        negotiation_status:
+          type: string
+          enum: [em_andamento, pausado, vendido, perdido]
+        products:
+          type: array
+          items:
+            type: object
+          nullable: true
+        qualification_score:
+          type: integer
+          minimum: 0
+          maximum: 100
+          nullable: true
+        qualification_data:
+          type: object
+          nullable: true
+        created:
+          type: string
+          format: date-time
+        updated:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+
+    OpportunityCreate:
+      type: object
+      required:
+        - funnel_id
+        - stage_id
+        - name
+        - negotiation_status
+      properties:
+        lead_id:
+          type: string
+        funnel_id:
+          type: string
+        stage_id:
+          type: string
+        assigned_user_id:
+          type: string
+        name:
+          type: string
+          maxLength: 200
+        company:
+          type: string
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        phone:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 200
+        estimated_value:
+          type: number
+          format: decimal
+          maximum: 99999999.99
+        negotiation_status:
+          type: string
+          enum: [em_andamento, pausado, vendido, perdido]
+        products:
+          type: array
+          items:
+            type: object
+
+    OpportunityUpdate:
+      type: object
+      properties:
+        stage_id:
+          type: string
+        assigned_user_id:
+          type: string
+        name:
+          type: string
+          maxLength: 200
+        company:
+          type: string
+          maxLength: 200
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        phone:
+          type: string
+          maxLength: 20
+        source:
+          type: string
+          maxLength: 200
+        estimated_value:
+          type: number
+          format: decimal
+          maximum: 99999999.99
+        negotiation_status:
+          type: string
+          enum: [em_andamento, pausado, vendido, perdido]
+        products:
+          type: array
+          items:
+            type: object
+
+    Error:
+      type: object
+      properties:
+        code:
+          type: integer
+        message:
+          type: string
+        data:
+          type: object
+
+  responses:
+    BadRequest:
+      description: Requisição inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Unauthorized:
+      description: Não autenticado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    Forbidden:
+      description: Não autorizado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: Recurso não encontrado
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
