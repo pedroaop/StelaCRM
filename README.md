@@ -1,10 +1,33 @@
 # StelaCRM
 
-Sistema de CRM (Customer Relationship Management) SaaS Single-Tenant desenvolvido para pequenas empresas que precisam de uma solução simples, flexível e eficiente para gerenciar vendas e relacionamento com clientes.
+Sistema de CRM (Customer Relationship Management) SaaS Single-Tenant desenvolvido em Go para pequenas empresas que precisam de uma solução simples, flexível e eficiente para gerenciar vendas e relacionamento com clientes.
 
 ## 📋 Sobre o Projeto
 
 O StelaCRM é uma plataforma completa de gestão de relacionamento com clientes e vendas, projetada especificamente para atender às necessidades de pequenas empresas. Com uma interface intuitiva e funcionalidades robustas, o sistema permite gerenciar todo o ciclo de vendas desde a captação de leads até o fechamento de negócios.
+
+### Características Principais
+
+- **Single-Tenant**: Uma instalação = uma empresa, garantindo controle total sobre os dados
+- **Desenvolvido em Go**: Backend nativo em Go utilizando PocketBase como framework
+- **Frontend Moderno**: Go Templates + HTMX para interface responsiva e interativa
+- **Self-Service Onboarding**: Configuração inicial em menos de 10 minutos
+- **Performance**: 95% das requisições de API < 200ms, dashboard < 2s
+
+## 🚀 Tecnologias
+
+### Backend
+- **Go 1.21+**: Linguagem principal
+- **PocketBase**: Framework backend com API REST nativa
+- **SQLite**: Banco de dados embutido (via PocketBase)
+
+### Frontend
+- **Go Templates** (`html/template`): Renderização server-side
+- **HTMX 1.x**: Interatividade incremental sem JavaScript complexo
+
+### Testes
+- **Go testing package**: Framework de testes padrão
+- **testify**: Assertions e mocking
 
 ## ✨ Funcionalidades Principais
 
@@ -73,19 +96,110 @@ Pequenas empresas que buscam:
 - Gestão eficiente do ciclo de vendas
 - Relatórios e análises de performance
 
+## 📦 Pré-requisitos
+
+- **Go 1.21 ou superior**: [Instalar Go](https://go.dev/doc/install)
+- **Git**: Para controle de versão
+
+### Verificar Instalação
+
+```bash
+go version        # Deve exibir Go 1.21 ou superior
+git --version     # Git instalado
+```
+
+## 🛠️ Instalação
+
+### 1. Clonar o Repositório
+
+```bash
+git clone https://github.com/seu-usuario/stela-crm.git
+cd stela-crm
+```
+
+### 2. Inicializar Módulo Go
+
+```bash
+go mod init github.com/stela-crm/stela-crm
+go get github.com/pocketbase/pocketbase
+```
+
+### 3. Configurar Variáveis de Ambiente
+
+Criar arquivo `.env` (opcional, pode usar configuração padrão):
+
+```env
+# PocketBase
+PB_DATA_DIR=./pb_data
+PB_ENCRYPTION_KEY=your-encryption-key-here
+
+# Aplicação
+PORT=8090
+ENV=development
+```
+
+### 4. Executar Aplicação
+
+```bash
+# Desenvolvimento
+go run cmd/stela-crm/main.go serve
+
+# Ou build e executar
+go build -o bin/stela-crm cmd/stela-crm/main.go
+./bin/stela-crm serve
+```
+
+### 5. Acessar Sistema
+
+- **Admin UI**: http://localhost:8090/_/
+- **API**: http://localhost:8090/api/
+- **Aplicação**: http://localhost:8090/
+
+## 📁 Estrutura do Projeto
+
+```
+stela-crm/
+├── cmd/
+│   └── stela-crm/
+│       └── main.go              # Entry point
+├── internal/
+│   ├── models/                  # Domain entities
+│   ├── services/                # Business logic
+│   ├── handlers/                # HTTP handlers
+│   ├── hooks/                   # PocketBase hooks
+│   ├── migrations/              # Database migrations
+│   └── lib/                     # Reusable libraries
+├── templates/                   # Go Templates
+│   ├── layouts/
+│   ├── pages/
+│   └── components/
+├── static/                      # Static assets
+│   ├── css/
+│   ├── js/
+│   └── images/
+├── tests/                       # Tests
+│   ├── integration/
+│   ├── unit/
+│   └── fixtures/
+├── specs/                       # Specifications
+│   ├── 1-stela-crm/
+│   │   ├── spec.md
+│   │   └── checklists/
+│   └── main/
+│       ├── plan.md
+│       ├── research.md
+│       ├── data-model.md
+│       ├── quickstart.md
+│       └── contracts/
+└── README.md
+```
+
 ## 🚀 Começando
-
-### Pré-requisitos
-
-[Documentar tecnologias e versões necessárias quando disponível]
-
-### Instalação
-
-[Instruções de instalação serão adicionadas durante o desenvolvimento]
 
 ### Configuração Inicial
 
 O sistema permite um onboarding rápido e intuitivo:
+
 1. Configuração inicial da empresa
 2. Criação do primeiro usuário administrador
 3. Configuração do primeiro funil de vendas
@@ -94,70 +208,106 @@ O sistema permite um onboarding rápido e intuitivo:
 
 **Tempo estimado:** Menos de 10 minutos
 
+Consulte o [Quickstart Guide](specs/main/quickstart.md) para instruções detalhadas.
+
 ## 📖 Documentação
 
-A documentação completa do projeto está disponível na pasta `specs/`:
-- **Especificação técnica**: `specs/1-stela-crm/spec.md`
-- **Plano de desenvolvimento**: `specs/main/plan.md`
-- **Checklist de requisitos**: `specs/1-stela-crm/checklists/requirements.md`
+### Documentação Principal
+
+- **Especificação Técnica**: [`specs/1-stela-crm/spec.md`](specs/1-stela-crm/spec.md)
+- **Plano de Implementação**: [`specs/main/plan.md`](specs/main/plan.md)
+- **Modelo de Dados**: [`specs/main/data-model.md`](specs/main/data-model.md)
+- **Quickstart Guide**: [`specs/main/quickstart.md`](specs/main/quickstart.md)
+- **Decisões Técnicas**: [`specs/main/research.md`](specs/main/research.md)
+
+### APIs
+
+- **OpenAPI/Swagger**: [`specs/main/contracts/openapi.yaml`](specs/main/contracts/openapi.yaml)
+- **API REST**: Documentação completa via PocketBase Admin UI
+
+### Referências Externas
+
+- **PocketBase Docs**: https://pocketbase.io/docs/
+- **PocketBase Go SDK**: https://github.com/pocketbase/pocketbase
+- **Go Templates**: https://pkg.go.dev/html/template
+- **HTMX**: https://htmx.org/
+
+## 🧪 Testes
+
+### Executar Testes
+
+```bash
+# Todos os testes
+go test ./...
+
+# Testes unitários
+go test ./tests/unit/...
+
+# Testes de integração
+go test ./tests/integration/...
+```
+
+### Estrutura de Testes
+
+- **Unit Tests**: Lógica de negócio isolada (services, models, validators)
+- **Integration Tests**: Integração com PocketBase (hooks, routes, handlers)
 
 ## 🏗️ Arquitetura
 
-[Detalhes de arquitetura serão adicionados durante o desenvolvimento]
-
 ### Principais Entidades
 
-- **Organization**: Empresa/organização
+- **Organization**: Empresa/organização (única por instalação)
 - **User**: Usuários do sistema
 - **Profile**: Perfis de permissões
 - **Funnel**: Funis de vendas
+- **FunnelStage**: Etapas de funis
 - **Lead**: Leads de vendas
 - **Opportunity**: Oportunidades de venda
 - **Task**: Tarefas
 - **Note**: Anotações
-- **Product/Service**: Produtos e serviços
+- **Product**: Produtos e serviços
 - **Proposal**: Propostas comerciais
+- **EmailTemplate**: Templates de email
 - **WorkflowRule**: Regras de workflow
 - **ActivityLog**: Log de atividades
 
-## 🔒 Segurança
+Para detalhes completos, consulte o [Data Model](specs/main/data-model.md).
 
-- Autenticação baseada em email/senha
-- Sistema de permissões granular
-- Princípio do menor privilégio
-- Log de auditoria para operações críticas
-- Validação de dados em todas as entradas
+### Princípios Arquiteturais
 
-## 🌍 Localização
+O projeto segue os princípios definidos na [Constituição Stela CRM](.specify/memory/constitution.md):
 
-- Idioma: Português Brasileiro (PT-BR)
-- Moeda: Real Brasileiro (R$)
-- Formato de data: DD/MM/YYYY
-- Formato de hora: HH:mm
-- Fuso horário configurável por organização
-
-## 📊 Métricas de Performance
-
-O sistema foi projetado para atender aos seguintes critérios de performance:
-- 95% das requisições de API respondem em menos de 200ms
-- Dashboard carrega em menos de 2 segundos
-- Importação de até 1000 leads em menos de 30 segundos
-- Visualização kanban suporta até 100 oportunidades por etapa
+- **API First**: APIs documentadas antes da UI
+- **Library First**: Funcionalidades complexas como bibliotecas independentes
+- **Cloud Native**: Compatível com 12-Factor App
+- **Non-Blocking**: Operações longas assíncronas, APIs < 200ms p95
+- **Self-Service Onboarding**: Configuração sem assistência
+- **Sensible Defaults**: Funciona "out of the box"
+- **TDD**: Testes escritos antes da implementação
+- **Clean Code/Architecture**: Código limpo e arquitetura em camadas
 
 ## 🤝 Contribuindo
 
-[Diretrizes de contribuição serão adicionadas]
+Contribuições são bem-vindas! Por favor:
+
+1. Fork o projeto
+2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
+3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
+4. Push para a branch (`git push origin feature/AmazingFeature`)
+5. Abra um Pull Request
 
 ## 📝 Licença
 
-[Informações de licença serão adicionadas]
+[Adicionar licença quando definida]
 
 ## 📧 Contato
 
-[Informações de contato serão adicionadas]
+[Adicionar informações de contato]
 
 ---
 
-**Status do Projeto:** Em desenvolvimento
+**Status do Projeto**: 🚧 Em Desenvolvimento
 
-Para mais informações, consulte a [especificação completa](./specs/1-stela-crm/spec.md).
+**Versão**: 0.1.0 (Planejamento)
+
+**Última Atualização**: Janeiro 2026
